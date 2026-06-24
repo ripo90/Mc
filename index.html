@@ -4269,16 +4269,46 @@ function saveJournal() {
 }
 
 function renderJournalHistory() {
+function shareJournal(index) {
+  const j = state.journals[index];
+  if (!j) return;
+  const shareText = j.mood + ' মাস্টার কন্ট্রোল জার্নাল — ' + j.date + '\n\n"' + j.text + '"\n\n#মাস্টারকন্ট্রোল #আত্মশুদ্ধি';
+  if (navigator.share) {
+    navigator.share({ text: shareText }).catch(() => {});
+  } else if (navigator.clipboard) {
+    navigator.clipboard.writeText(shareText).then(() => {
+      showToast('✅ লেখা কপি হয়েছে! গ্রুপে পেস্ট করুন।');
+    }).catch(() => showShareModal(shareText));
+  } else {
+    showShareModal(shareText);
+  }
+}
+
+function showShareModal(text) {
+  const existing = document.getElementById('share-modal');
+  if (existing) existing.remove();
+  const modal = document.createElement('div');
+  modal.id = 'share-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.8);backdrop-filter:blur(8px);display:flex;align-items:flex-end;justify-content:center;padding:20px;';
+  const safeText = text.replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  modal.innerHTML = '<div style="background:var(--card);border:1px solid var(--border);border-radius:20px 20px 16px 16px;padding:24px 20px;width:100%;max-width:420px;"><div style="font-size:16px;font-weight:800;margin-bottom:14px;font-family:var(--font-serif);">📤 জার্নাল শেয়ার করুন</div><textarea id="share-text-area" readonly style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px;color:var(--text);font-size:13px;font-family:inherit;line-height:1.6;resize:none;height:120px;margin-bottom:14px;">' + safeText + '</textarea><div style="display:flex;gap:10px;"><button onclick="var t=document.getElementById(\'share-text-area\').value;navigator.clipboard&&navigator.clipboard.writeText(t).then(function(){showToast(\'✅ কপি হয়েছে!\')}).catch(function(){})" style="flex:1;padding:12px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">📋 কপি করুন</button><button onclick="var t=document.getElementById(\'share-text-area\').value;window.open(\'https://wa.me/?text=\'+encodeURIComponent(t),\'_blank\')" style="flex:1;padding:12px;background:rgba(37,211,102,0.15);border:1px solid rgba(37,211,102,0.3);border-radius:12px;color:#25d366;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;">💬 WhatsApp</button></div><button onclick="document.getElementById(\'share-modal\').remove()" style="width:100%;margin-top:10px;padding:10px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;font-family:inherit;">বাতিল</button></div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+}
+
   const container = document.getElementById('journal-history');
   if (!state.journals.length) {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>এখনো কোনো লেখা নেই</div>';
     return;
   }
-  container.innerHTML = state.journals.slice(0, 5).map(j => `
+  container.innerHTML = state.journals.slice(0, 5).map((j, i) => `
     <div class="journal-entry">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div class="journal-date">${j.date}</div>
-        <div class="journal-mood">${j.mood}</div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="journal-mood">${j.mood}</div>
+          <button onclick="shareJournal(${i})" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:4px 10px;color:var(--accent);font-size:12px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:4px;">📤 শেয়ার</button>
+        </div>
       </div>
       <div class="journal-text">${j.text}</div>
     </div>
@@ -5744,6 +5774,9 @@ function attachRipple(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Daily quote
+  updateDailyQuote();
+
   // Initial attach
   document.querySelectorAll('.btn').forEach(el => {
     el.dataset.ripple = '1';
@@ -5763,13 +5796,12 @@ document.addEventListener('DOMContentLoaded', () => {
   observer.observe(document.body, { childList: true, subtree: true });
 });
 
-// PWA SERVICE WORKER — only on real hosting, not claude.ai preview
-if ('serviceWorker' in navigator && 
-    !location.hostname.includes('claudeusercontent') &&
-    !location.hostname.includes('claude.ai') &&
-    location.protocol === 'https:') {
+// PWA SERVICE WORKER — works on any https host
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(() => {});
+    navigator.serviceWorker.register('sw.js').then(reg => {
+      console.log('SW registered:', reg.scope);
+    }).catch(err => console.log('SW error:', err));
   });
 }
 

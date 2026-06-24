@@ -1,8 +1,8 @@
 {
   "name": "মাস্টার কন্ট্রোল",
   "short_name": "মাস্টার কন্ট্রোল",
-  "description": "পেলভিক ফ্লোর স্বাস্থ্য ও আত্মনিয়ন্ত্রণ গাইড",
-  "start_url": "./index.html",
+  "description": "আত্মশুদ্ধি ও নফস কন্ট্রোলের সঙ্গী",
+  "start_url": "./index-1.html",
   "display": "standalone",
   "background_color": "#080d18",
   "theme_color": "#0f172a",
@@ -10,18 +10,16 @@
   "lang": "bn",
   "icons": [
     {
-      "src": "images/logo-0ab19f16.png",
+      "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "images/logo-0ab19f16.png",
+      "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["health", "fitness", "education"],
-  "prefer_related_applications": false
+  ]
 }
