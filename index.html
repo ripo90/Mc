@@ -49,7 +49,7 @@
   /* APP WRAPPER */
   #app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 
-  /* SCREENS */
+  /* SCREENS — transition defined with nav styles below */
   .screen { display:none; flex:1; overflow-y:auto; padding-bottom:88px; }
   .screen.active { display:block; }
 
@@ -96,6 +96,49 @@
   .nav-item .nav-icon { font-size:20px; margin-bottom:3px; transition:transform .2s; }
   .nav-item.active .nav-icon { transform:scale(1.15); }
   .nav-item .nav-label { font-size:10px; font-weight:600; }
+
+  /* Active glow dot */
+  .nav-item::after {
+    content:'';
+    display:block;
+    width:4px; height:4px;
+    border-radius:50%;
+    background:transparent;
+    margin:2px auto 0;
+    transition:all .25s ease;
+  }
+  .nav-item.active::after {
+    background:var(--accent);
+    box-shadow: 0 0 8px var(--accent), 0 0 16px rgba(99,102,241,0.5);
+  }
+
+  /* Active tab top highlight bar */
+  .nav-item.active .nav-icon {
+    transform:scale(1.2) translateY(-2px);
+    filter: drop-shadow(0 0 6px rgba(99,102,241,0.8));
+  }
+
+  /* Screen fade transition */
+  .screen { display:none; flex:1; overflow-y:auto; padding-bottom:88px; }
+  .screen.active {
+    display:block;
+    animation: screenFadeIn 0.22s ease forwards;
+  }
+  @keyframes screenFadeIn {
+    from { opacity:0; transform:translateY(6px); }
+    to   { opacity:1; transform:translateY(0); }
+  }
+
+  /* Nav tap bounce */
+  @keyframes navBounce {
+    0%   { transform:scale(1); }
+    40%  { transform:scale(0.85); }
+    70%  { transform:scale(1.25); }
+    100% { transform:scale(1.2) translateY(-2px); }
+  }
+  .nav-item.active .nav-icon {
+    animation: navBounce 0.3s ease forwards;
+  }
 
   /* CARDS */
   .card {
@@ -171,29 +214,59 @@
     border:none; cursor:pointer;
     font-family:var(--font-serif);
     font-size:15px; font-weight:600;
-    transition:all .2s; width:100%;
+    transition:all .18s ease; width:100%;
     letter-spacing:0.01em;
+    position:relative; overflow:hidden;
   }
+  .btn:active { transform:scale(0.96); }
   .btn-primary {
     background:linear-gradient(135deg, #5558e8, #7c3aed);
     color:#fff;
     box-shadow: 0 4px 20px rgba(99,102,241,0.35);
   }
-  .btn-primary:active { transform:scale(0.97); box-shadow:none; }
+  .btn-primary:active { transform:scale(0.96); box-shadow:0 2px 8px rgba(99,102,241,0.2); }
   .btn-outline { background:transparent; border:1.5px solid var(--accent); color:var(--accent); }
   .btn-green {
     background:linear-gradient(135deg, #047857, #059669);
     color:#fff;
     box-shadow: 0 4px 16px rgba(16,185,129,0.3);
   }
+  .btn-green:active { box-shadow:0 2px 6px rgba(16,185,129,0.15); }
   .btn-gold {
     background:linear-gradient(135deg, #b45309, #d97706);
     color:#fff;
     box-shadow: 0 4px 16px rgba(245,158,11,0.3);
   }
+  .btn-gold:active { box-shadow:0 2px 6px rgba(245,158,11,0.15); }
   .btn-sm { padding:9px 16px; font-size:13px; width:auto; border-radius:8px; }
 
-  /* TABS */
+  /* Ripple effect */
+  .ripple-effect {
+    position:absolute;
+    border-radius:50%;
+    background:rgba(255,255,255,0.25);
+    transform:scale(0);
+    animation:rippleAnim 0.5s linear;
+    pointer-events:none;
+  }
+  @keyframes rippleAnim {
+    to { transform:scale(4); opacity:0; }
+  }
+
+  /* Card press effect */
+  .card {
+    background:var(--card);
+    border:1px solid rgba(255,255,255,0.05);
+    border-radius:var(--radius);
+    padding:20px;
+    margin:0 14px 12px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .card:active {
+    transform: scale(0.985);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+  }
   .tabs { display:flex; gap:8px; padding:0 14px 16px; overflow-x:auto; }
   .tabs::-webkit-scrollbar { display:none; }
   .tab {
@@ -379,14 +452,44 @@
   .edu-card {
     background:var(--card); border:1px solid var(--border);
     border-radius:var(--radius); margin:0 16px 14px; overflow:hidden;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    border-left: 3px solid transparent;
+  }
+  .edu-card.open {
+    border-left-color: var(--accent);
+    box-shadow: 0 4px 20px rgba(99,102,241,0.12), -2px 0 0 var(--accent);
   }
   .edu-header {
     padding:16px 18px; display:flex; align-items:center;
     justify-content:space-between; cursor:pointer;
+    user-select:none;
   }
+  .edu-header:active { background: rgba(255,255,255,0.03); }
   .edu-title { font-size:15px; font-weight:600; display:flex; align-items:center; gap:10px; }
-  .edu-body { padding:0 18px 16px; font-size:13px; line-height:1.8; color:var(--text2); display:none; }
-  .edu-body.open { display:block; }
+  .edu-arrow {
+    font-size:12px; color:var(--text3);
+    transition: transform 0.3s ease, color 0.3s ease;
+    display:inline-block;
+  }
+  .edu-card.open .edu-arrow {
+    transform: rotate(180deg);
+    color: var(--accent);
+  }
+
+  /* Smooth slide animation */
+  .edu-body {
+    padding: 0 18px;
+    font-size:13px; line-height:1.8; color:var(--text2);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease, padding 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+  }
+  .edu-body.open {
+    max-height: 2000px;
+    padding: 0 18px 16px;
+    opacity: 1;
+  }
 
   /* SETTINGS ROW */
   .settings-row {
@@ -1708,62 +1811,87 @@
       <div style="padding:0 18px 18px;" id="muscle-steps-area-2"></div>
     </div>
 
-    <!-- eBook Section -->
-    <div style="padding:0 16px 10px; font-size:13px; font-weight:600; color:var(--text2);">📗 বিনামূল্যে</div>
+    <!-- eBook Section Header -->
+    <div style="display:flex;align-items:center;gap:10px;padding:8px 16px 14px;">
+      <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(16,185,129,0.4));"></div>
+      <span style="font-size:12px;font-weight:700;color:var(--green);letter-spacing:0.08em;font-family:var(--font-ui);">📗 বিনামূল্যে</span>
+      <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(16,185,129,0.4));"></div>
+    </div>
 
-    <!-- Book 1: সন্তানের অজানা জগৎ - FREE with real cover -->
-    <div style="margin:0 16px 16px; border-radius:var(--radius); background:var(--card); border:1px solid rgba(16,185,129,0.4); overflow:hidden;">
-      <div style="display:flex; gap:0;">
-        <!-- Cover Image -->
-        <div style="width:110px; flex-shrink:0; position:relative; background:#052e16; min-height:150px;">
-          <img src="images/logo-6477d386.jpg"
-               alt="সন্তানের অজানা জগৎ"
-               style="width:100%; height:100%; object-fit:cover; display:block; min-height:150px;"
-               onerror="this.style.display='none'; this.parentElement.innerHTML='<div style=\'display:flex;align-items:center;justify-content:center;height:150px;font-size:40px;\'>📖</div>'">
-          <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(5,46,22,0.9)); padding:6px 8px;">
-            <span class="badge badge-green" style="font-size:10px;">✅ ফ্রি</span>
-          </div>
+    <!-- Book 1: তোমার শক্তি তুমি - FREE -->
+    <div style="margin:0 14px 20px;border-radius:20px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.25);">
+      <!-- Background glow -->
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(16,185,129,0.08) 0%,rgba(6,78,59,0.15) 100%);"></div>
+      <div style="display:flex;position:relative;">
+        <!-- Cover -->
+        <div style="width:120px;flex-shrink:0;position:relative;min-height:190px;overflow:hidden;background:linear-gradient(160deg,#052e16,#064e3b);">
+          <img src="images/logo-6477d386.jpg" alt="তোমার শক্তি তুমি"
+            style="width:100%;height:100%;object-fit:cover;display:block;min-height:190px;"
+            onerror="this.style.display='none'">
+          <!-- Shine overlay -->
+          <div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,0.06) 0%,transparent 50%);"></div>
+          <!-- Side fade -->
+          <div style="position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(to right,transparent,rgba(8,13,24,0.6));"></div>
+          <!-- FREE badge -->
+          <div style="position:absolute;top:10px;left:0;background:linear-gradient(135deg,#047857,#10b981);color:#fff;font-size:10px;font-weight:800;padding:4px 10px 4px 8px;border-radius:0 20px 20px 0;font-family:var(--font-ui);letter-spacing:0.05em;box-shadow:0 2px 8px rgba(16,185,129,0.4);">✦ ফ্রি</div>
         </div>
         <!-- Info -->
-        <div style="flex:1; padding:16px 14px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="flex:1;padding:18px 16px;display:flex;flex-direction:column;justify-content:space-between;">
           <div>
-            <div style="font-size:15px; font-weight:700; color:#86efac; line-height:1.3; margin-bottom:6px;">তোমার শক্তি তুমি</div>
-            <div style="font-size:11px; color:var(--text2); line-height:1.6; margin-bottom:10px;">হস্তমৈথুন ও পর্নোগ্রাফি থেকে মুক্তি ও আত্মনিয়ন্ত্রণ গাইড</div>
-            <div style="font-size:11px; color:var(--text3);">📄 Flipbook • বিনামূল্যে পড়ুন</div>
+            <div style="font-size:9px;font-weight:700;color:var(--green);letter-spacing:0.1em;font-family:var(--font-ui);margin-bottom:6px;text-transform:uppercase;">আত্মনিয়ন্ত্রণ গাইড</div>
+            <div style="font-size:17px;font-weight:800;color:#86efac;line-height:1.3;margin-bottom:8px;">তোমার শক্তি<br>তুমি</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;">হস্তমৈথুন ও পর্নোগ্রাফি থেকে মুক্তি ও আত্মনিয়ন্ত্রণ গাইড</div>
+            <div style="display:flex;align-items:center;gap:6px;">
+              <span style="font-size:10px;color:var(--green);background:rgba(16,185,129,0.1);padding:3px 10px;border-radius:20px;font-family:var(--font-ui);">📄 Flipbook</span>
+            </div>
           </div>
-          <button class="btn btn-green" style="margin-top:12px; padding:10px; font-size:13px;" onclick="openFlipbookFree('local:tomarshokti', 'তোমার শক্তি তুমি')">
+          <button onclick="openFlipbookFree('local:tomarshokti', 'তোমার শক্তি তুমি')"
+            style="margin-top:14px;width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#047857,#10b981);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(16,185,129,0.35);letter-spacing:0.01em;">
             📖 এখনই পড়ুন
           </button>
         </div>
       </div>
     </div>
 
-    <div style="padding:0 16px 10px; font-size:13px; font-weight:600; color:var(--text2);">🔒 প্রিমিয়াম</div>
+    <!-- Premium section divider -->
+    <div style="display:flex;align-items:center;gap:10px;padding:4px 16px 14px;">
+      <div style="flex:1;height:1px;background:linear-gradient(to right,transparent,rgba(99,102,241,0.4));"></div>
+      <span style="font-size:12px;font-weight:700;color:var(--accent);letter-spacing:0.08em;font-family:var(--font-ui);">🔒 প্রিমিয়াম</span>
+      <div style="flex:1;height:1px;background:linear-gradient(to left,transparent,rgba(99,102,241,0.4));"></div>
+    </div>
 
     <!-- Book 2: পবিত্রতার পথে - PREMIUM -->
-    <div style="margin:0 16px 14px; border-radius:var(--radius); background:var(--card); border:1px solid rgba(99,102,241,0.4); overflow:hidden;">
-      <div style="display:flex; gap:0;">
-        <!-- Cover Image -->
-        <div style="width:110px; flex-shrink:0; position:relative; min-height:150px; overflow:hidden; background:linear-gradient(160deg,#1e1b4b,#312e81);">
+    <div style="margin:0 14px 16px;border-radius:20px;overflow:hidden;position:relative;box-shadow:0 8px 32px rgba(99,102,241,0.2);border:1px solid rgba(99,102,241,0.3);">
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(99,102,241,0.1) 0%,rgba(139,92,246,0.08) 100%);"></div>
+      <div style="display:flex;position:relative;">
+        <!-- Cover -->
+        <div style="width:120px;flex-shrink:0;position:relative;min-height:210px;overflow:hidden;background:linear-gradient(160deg,#1e1b4b,#312e81);">
           <img src="images/mastercontrol-01.jpg" alt="পবিত্রতার পথে" loading="lazy"
-            style="width:100%;height:100%;object-fit:cover;display:block;min-height:150px;"
+            style="width:100%;height:100%;object-fit:cover;display:block;min-height:210px;"
             onerror="this.style.display='none'">
-          <div style="position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(30,27,75,0.9));padding:6px 8px;">
-            <span class="badge badge-purple" style="font-size:10px;">🔒 প্রিমিয়াম</span>
-          </div>
+          <div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,0.06) 0%,transparent 50%);"></div>
+          <div style="position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(to right,transparent,rgba(8,13,24,0.6));"></div>
+          <!-- PREMIUM badge -->
+          <div style="position:absolute;top:10px;left:0;background:linear-gradient(135deg,#4338ca,#6366f1);color:#fff;font-size:10px;font-weight:800;padding:4px 10px 4px 8px;border-radius:0 20px 20px 0;font-family:var(--font-ui);letter-spacing:0.05em;box-shadow:0 2px 8px rgba(99,102,241,0.5);">🔒 প্রিমিয়াম</div>
         </div>
         <!-- Info -->
-        <div style="flex:1; padding:16px 14px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="flex:1;padding:18px 16px;display:flex;flex-direction:column;justify-content:space-between;">
           <div>
-            <div style="font-size:15px; font-weight:700; color:#a5b4fc; line-height:1.3; margin-bottom:6px;">পবিত্রতার পথে</div>
-            <div style="font-size:11px; color:var(--text2); line-height:1.6; margin-bottom:10px;">আধ্যাত্মিক ও বৈজ্ঞানিক মুক্তির পথ</div>
-            <div style="font-size:11px; color:var(--text3);">ইমান • আত্মিক জাগরণ • সফলতার গল্প</div>
+            <div style="font-size:9px;font-weight:700;color:var(--accent);letter-spacing:0.1em;font-family:var(--font-ui);margin-bottom:6px;text-transform:uppercase;">আধ্যাত্মিক গাইড</div>
+            <div style="font-size:17px;font-weight:800;color:#c4b5fd;line-height:1.3;margin-bottom:8px;">পবিত্রতার<br>পথে</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;">আধ্যাত্মিক ও বৈজ্ঞানিক মুক্তির পথ</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <span style="font-size:10px;color:var(--accent2);background:rgba(139,92,246,0.1);padding:3px 9px;border-radius:20px;font-family:var(--font-ui);">ইমান</span>
+              <span style="font-size:10px;color:var(--accent2);background:rgba(139,92,246,0.1);padding:3px 9px;border-radius:20px;font-family:var(--font-ui);">আত্মিক জাগরণ</span>
+            </div>
           </div>
-          <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
-            <button class="btn" style="padding:9px; font-size:13px; background:rgba(99,102,241,0.15); border:1.5px solid rgba(99,102,241,0.4); color:var(--accent);" onclick="openFlipbook('purity')">
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+            <button onclick="openFlipbook('purity')"
+              style="width:100%;padding:10px;border:1.5px solid rgba(99,102,241,0.5);border-radius:12px;background:rgba(99,102,241,0.12);color:#a5b4fc;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
               📖 ৫ পেজ ফ্রি দেখুন
             </button>
-            <button class="btn btn-primary" style="padding:9px; font-size:13px;" onclick="isAppUnlocked() ? openFlipbook('purity') : showUnlockPrompt('পবিত্রতার পথে বই')">
+            <button onclick="isAppUnlocked() ? openFlipbook('purity') : showUnlockPrompt('পবিত্রতার পথে বই')"
+              style="width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#4338ca,#7c3aed);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(99,102,241,0.4);">
               🔓 কিনুন ও Unlock করুন
             </button>
           </div>
@@ -1771,40 +1899,43 @@
       </div>
     </div>
 
-    <!-- Book 3: রিকভারি সংস্করণ - PREMIUM with Flipbook -->
-    <div style="margin:0 16px 20px; border-radius:var(--radius); background:var(--card); border:1px solid rgba(245,158,11,0.4); overflow:hidden; box-shadow:0 4px 20px rgba(245,158,11,0.1);">
-      <div style="display:flex; gap:0;">
-        <!-- Real Cover -->
-        <div style="width:110px; flex-shrink:0; position:relative; min-height:160px; overflow:hidden; background:linear-gradient(160deg,#0d1b3e,#1a3a6e,#0a1628);" id="recovery-cover">
+    <!-- Book 3: রিকভারি সংস্করণ - PREMIUM -->
+    <div style="margin:0 14px 24px;border-radius:20px;overflow:hidden;position:relative;box-shadow:0 8px 36px rgba(245,158,11,0.2);border:1px solid rgba(245,158,11,0.3);">
+      <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,158,11,0.09) 0%,rgba(120,53,15,0.12) 100%);"></div>
+      <div style="display:flex;position:relative;">
+        <!-- Cover -->
+        <div style="width:120px;flex-shrink:0;position:relative;min-height:210px;overflow:hidden;background:linear-gradient(160deg,#0d1b3e,#1a3a6e);" id="recovery-cover">
           <img id="recovery-cover-img" src="images/recovery-01.jpg" alt="রিকভারি সংস্করণ"
-            style="width:100%; height:100%; object-fit:cover; display:block; position:absolute; inset:0;"
+            style="width:100%;height:100%;object-fit:cover;display:block;position:absolute;inset:0;min-height:210px;"
             onload="document.getElementById('recovery-cover-fallback').style.display='none';"
-            onerror="this.style.display='none'; document.getElementById('recovery-cover-fallback').style.display='flex';">
-          <!-- Fallback — hidden by default, shown only if image fails -->
+            onerror="this.style.display='none';document.getElementById('recovery-cover-fallback').style.display='flex';">
           <div id="recovery-cover-fallback" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center;">
-            <div style="font-size:32px;margin-bottom:6px;">📖</div>
-            <div style="font-size:9px;font-weight:800;color:#fcd34d;line-height:1.4;letter-spacing:0.5px;">রিকভারি<br>সংস্করণ</div>
+            <div style="font-size:36px;margin-bottom:8px;">📖</div>
+            <div style="font-size:9px;font-weight:800;color:#fcd34d;line-height:1.5;">রিকভারি<br>সংস্করণ</div>
           </div>
-          <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 60%,var(--card));pointer-events:none;"></div>
-          <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(28,25,23,0.95)); padding:6px 8px;">
-            <span class="badge badge-gold" style="font-size:10px;">🔒 প্রিমিয়াম</span>
-          </div>
+          <div style="position:absolute;inset:0;background:linear-gradient(120deg,rgba(255,255,255,0.06) 0%,transparent 50%);"></div>
+          <div style="position:absolute;top:0;right:0;bottom:0;width:30px;background:linear-gradient(to right,transparent,rgba(8,13,24,0.6));"></div>
+          <!-- PREMIUM badge -->
+          <div style="position:absolute;top:10px;left:0;background:linear-gradient(135deg,#b45309,#f59e0b);color:#fff;font-size:10px;font-weight:800;padding:4px 10px 4px 8px;border-radius:0 20px 20px 0;font-family:var(--font-ui);letter-spacing:0.05em;box-shadow:0 2px 8px rgba(245,158,11,0.5);">🔒 প্রিমিয়াম</div>
         </div>
         <!-- Info -->
-        <div style="flex:1; padding:16px 14px; display:flex; flex-direction:column; justify-content:space-between;">
+        <div style="flex:1;padding:18px 16px;display:flex;flex-direction:column;justify-content:space-between;">
           <div>
-            <div style="font-size:15px; font-weight:700; color:#fcd34d; line-height:1.3; margin-bottom:4px;">রিকভারি সংস্করণ</div>
-            <div style="font-size:11px; color:var(--text2); line-height:1.6; margin-bottom:6px;">নারী-পুরুষ উভয়ের আত্মনিয়ন্ত্রণের পূর্ণাঙ্গ গাইড</div>
-            <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:8px;">
-              <span style="font-size:10px; color:var(--text3); background:var(--surface); padding:2px 8px; border-radius:10px; font-family:var(--font-ui);">১৪৫ পেজ</span>
-              <span style="font-size:10px; color:var(--gold); background:rgba(245,158,11,0.1); padding:2px 8px; border-radius:10px; font-family:var(--font-ui);">২৯৯ টাকা</span>
+            <div style="font-size:9px;font-weight:700;color:var(--gold);letter-spacing:0.1em;font-family:var(--font-ui);margin-bottom:6px;text-transform:uppercase;">পূর্ণাঙ্গ রিকভারি</div>
+            <div style="font-size:17px;font-weight:800;color:#fde68a;line-height:1.3;margin-bottom:8px;">রিকভারি<br>সংস্করণ</div>
+            <div style="font-size:12px;color:var(--text2);line-height:1.7;margin-bottom:10px;">নারী-পুরুষ উভয়ের আত্মনিয়ন্ত্রণের পূর্ণাঙ্গ গাইড</div>
+            <div style="display:flex;flex-wrap:wrap;gap:5px;">
+              <span style="font-size:10px;color:var(--text3);background:var(--surface);padding:3px 9px;border-radius:20px;font-family:var(--font-ui);">📄 ১৪৫ পেজ</span>
+              <span style="font-size:10px;color:var(--gold);background:rgba(245,158,11,0.12);padding:3px 9px;border-radius:20px;font-family:var(--font-ui);font-weight:700;">৳ ২৯৯</span>
             </div>
           </div>
-          <div style="display:flex; flex-direction:column; gap:8px; margin-top:8px;">
-            <button class="btn" style="padding:9px; font-size:13px; background:rgba(245,158,11,0.15); border:1.5px solid rgba(245,158,11,0.4); color:var(--gold);" onclick="openFlipbook('recovery')">
+          <div style="display:flex;flex-direction:column;gap:8px;margin-top:14px;">
+            <button onclick="openFlipbook('recovery')"
+              style="width:100%;padding:10px;border:1.5px solid rgba(245,158,11,0.4);border-radius:12px;background:rgba(245,158,11,0.1);color:#fcd34d;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;">
               📖 ৫ পেজ ফ্রি দেখুন
             </button>
-            <button class="btn btn-gold" style="padding:9px; font-size:13px;" onclick="isAppUnlocked() ? openFlipbook('recovery') : showUnlockPrompt('রিকভারি সংস্করণ বই')">
+            <button onclick="isAppUnlocked() ? openFlipbook('recovery') : showUnlockPrompt('রিকভারি সংস্করণ বই')"
+              style="width:100%;padding:11px;border:none;border-radius:12px;background:linear-gradient(135deg,#b45309,#d97706);color:#fff;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 16px rgba(245,158,11,0.4);">
               🔓 কিনুন ও Unlock করুন
             </button>
           </div>
@@ -1813,10 +1944,10 @@
     </div>
 
     <!-- Education Accordions -->
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#ef4444">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>🫀</span> পেলভিক ফ্লোর কী?</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         পেলভিক ফ্লোর হলো পেটের নিচের দিকে থাকা পেশীর একটি গ্রুপ যা মূত্রাশয়, অন্ত্র এবং প্রজনন অঙ্গকে সমর্থন করে। এই পেশীগুলো সঠিকভাবে কাজ না করলে বিভিন্ন সমস্যা দেখা দিতে পারে।
@@ -1829,10 +1960,10 @@
       </div>
     </div>
 
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#10b981">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>💪</span> কেগেলের উপকারিতা</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         কেগেল ব্যায়াম নিয়মিত করলে পাবেন:<br><br>
@@ -1846,10 +1977,10 @@
       </div>
     </div>
 
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#f59e0b">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>⚠️</span> সাধারণ ভুলগুলো</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         কেগেল করার সময় অনেকে যে ভুল করেন:<br><br>
@@ -1862,10 +1993,10 @@
       </div>
     </div>
 
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#06b6d4">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>🔄</span> রিকভারি প্রক্রিয়া</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         পর্নোগ্রাফি ও হস্তমৈথুন আসক্তি থেকে মুক্তির পথ:<br><br>
@@ -1877,10 +2008,10 @@
       </div>
     </div>
 
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#8b5cf6">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>❓</span> সাধারণ প্রশ্নোত্তর</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         <strong>প্র: কেগেল কি প্রতিদিন করতে হবে?</strong><br>
@@ -1898,7 +2029,7 @@
     <div class="edu-card" style="border-color:rgba(239,68,68,0.3);">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>📵</span> ডিভাইসে পর্ণ ব্লক করুন</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         <div style="background:rgba(239,68,68,0.08);border:1px solid rgba(239,68,68,0.2);border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;line-height:1.7;">
@@ -1977,10 +2108,10 @@
     <div style="padding:0 16px 16px; font-size:13px; color:var(--text2);">আয়ুর্বেদিক জীবনধারা ও প্রাকৃতিক উপায়ে সুস্থ থাকুন</div>
 
     <!-- Ayurvedic Lifestyle -->
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#10b981">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>🌱</span> আয়ুর্বেদিক জীবনধারা</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         <strong>দিনচর্যা (Dinacharya):</strong><br>
@@ -2020,10 +2151,10 @@
     </div>
 
     <!-- Diet -->
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#84cc16">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>🥗</span> খাদ্যাভ্যাস ও পুষ্টি</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         <strong>পেলভিক স্বাস্থ্যের জন্য সেরা খাবার:</strong><br>
@@ -2045,10 +2176,10 @@
     </div>
 
     <!-- Sleep -->
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#818cf8">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>😴</span> ঘুমের গুরুত্ব ও সঠিক পদ্ধতি</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         <strong>কেন ঘুম এত গুরুত্বপূর্ণ?</strong><br>
@@ -2066,10 +2197,10 @@
     </div>
 
     <!-- Stress Management -->
-    <div class="edu-card">
+    <div class="edu-card" data-accent="#06b6d4">
       <div class="edu-header" onclick="toggleEdu(this)">
         <div class="edu-title"><span>🧘</span> স্ট্রেস ম্যানেজমেন্ট</div>
-        <span>▼</span>
+        <span class="edu-arrow">▼</span>
       </div>
       <div class="edu-body">
         <strong>স্ট্রেস ও পেলভিক স্বাস্থ্যের সম্পর্ক:</strong><br>
@@ -2718,7 +2849,9 @@ function showScreen(id) {
   }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-  document.getElementById('screen-' + id).classList.add('active');
+  const screenEl = document.getElementById('screen-' + id);
+  screenEl.classList.add('active');
+  screenEl.scrollTop = 0;
   document.getElementById('nav-' + id).classList.add('active');
   document.getElementById('topbar-title').textContent = screenTitles[id];
   if (id === 'home') updateHome();
@@ -2727,7 +2860,6 @@ function showScreen(id) {
   if (id === 'health') updateHealth();
   if (id === 'kegel') { setTimeout(() => renderMuscleGuide(1), 100); initChallenge(); }
   if (id === 'edu')   setTimeout(() => renderMuscleGuide(2), 100);
-  window.scrollTo(0, 0);
 }
 
 // =====================
@@ -4474,10 +4606,27 @@ function buildMonthlyChart() {
 // EDUCATION
 // =====================
 function toggleEdu(header) {
+  const card = header.parentElement;
   const body = header.nextElementSibling;
-  const arrow = header.querySelector('span:last-child');
-  body.classList.toggle('open');
-  arrow.textContent = body.classList.contains('open') ? '▲' : '▼';
+  const isOpen = body.classList.contains('open');
+  const accent = card.dataset.accent || 'var(--accent)';
+
+  // Close all others
+  document.querySelectorAll('.edu-body.open').forEach(b => {
+    b.classList.remove('open');
+    const c = b.previousElementSibling.parentElement;
+    c.classList.remove('open');
+    c.style.borderLeftColor = 'transparent';
+    c.style.boxShadow = '';
+  });
+
+  // Toggle current
+  if (!isOpen) {
+    body.classList.add('open');
+    card.classList.add('open');
+    card.style.borderLeftColor = accent;
+    card.style.boxShadow = `0 4px 20px ${accent}22, -2px 0 0 ${accent}`;
+  }
 }
 
 function openContact(type) {
@@ -4879,6 +5028,27 @@ function fbChangePage(dir) {}
   `;
   document.head.appendChild(style);
 })();
+
+// ========================
+// RIPPLE EFFECT
+// ========================
+function attachRipple(el) {
+  el.addEventListener('pointerdown', function(e) {
+    const r = el.getBoundingClientRect();
+    const size = Math.max(r.width, r.height);
+    const x = e.clientX - r.left - size / 2;
+    const y = e.clientY - r.top - size / 2;
+    const ripple = document.createElement('span');
+    ripple.className = 'ripple-effect';
+    ripple.style.cssText = `width:${size}px;height:${size}px;left:${x}px;top:${y}px;`;
+    el.appendChild(ripple);
+    ripple.addEventListener('animationend', () => ripple.remove());
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.querySelectorAll('.btn, button.nav-item').forEach(attachRipple);
+});
 
 // PWA SERVICE WORKER — only on real hosting, not claude.ai preview
 if ('serviceWorker' in navigator && 
