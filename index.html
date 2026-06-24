@@ -2748,28 +2748,112 @@ function resetChallenge() {
 // ========================
 // MASTER UNLOCK SYSTEM
 // ========================
-const APP_UNLOCK_CODES = [
-  'MC-08J7-AXCP','MC-13RY-PYXG','MC-1F83-96W6','MC-1U06-Y9S7','MC-2DYR-ZFKJ',
-  'MC-3IEB-TEAJ','MC-3IZW-RGP4','MC-3Q1Q-96LZ','MC-3S3P-ZL79','MC-3XG2-176M',
-  'MC-40N8-ZA38','MC-4ODB-86I3','MC-4VCO-ALH3','MC-560X-4HW8','MC-5B5C-7WSI',
-  'MC-5PR0-D18E','MC-6BY8-YMN4','MC-6V2C-0VYG','MC-7T3I-F0Q9','MC-7YCR-UCX3',
-  'MC-86J8-UZ12','MC-8PNE-N4VB','MC-98GZ-H0AL','MC-9A46-JG8E','MC-9AMN-E4AU',
-  'MC-9C7V-O9X7','MC-9D78-E37I','MC-9DZS-HHZZ','MC-9IYW-6EDS','MC-9L9Q-KEF2',
-  'MC-B78U-YFVY','MC-BM3D-SIQ6','MC-BR1U-F36V','MC-BY8K-VPI0','MC-C19Z-VLNN',
-  'MC-C84D-BE90','MC-CFOC-DD58','MC-CQ3T-BI39','MC-CWUV-I7WC','MC-DIRF-B5DG',
-  'MC-ECMI-7YJW','MC-EHJX-K399','MC-EJFE-06GN','MC-EPUX-MSHS','MC-ERDI-2YZC',
-  'MC-F8XY-8LZQ','MC-FSR1-75T4','MC-FVSW-RPMG','MC-G4Q5-M7DB','MC-GCHE-4PRK',
-  'MC-GD49-0Q3C','MC-GH0N-6UM5','MC-GTDI-UEQO','MC-GUY4-8DHJ','MC-GY7U-6GUL',
-  'MC-HUIW-T3I8','MC-J2IX-SQFP','MC-J4LD-EG2Z','MC-J7ZV-NC7S','MC-JH0G-YFNA',
-  'MC-LHSX-WY1E','MC-LKJ6-BO12','MC-MBAH-2H0J','MC-MGII-MILC','MC-MGJU-AU03',
-  'MC-MNG5-8KOS','MC-MZLO-D2ZI','MC-N37O-7O46','MC-NFD7-A14M','MC-NFL0-38OA',
-  'MC-NOJ9-FMG0','MC-NW8I-AC3I','MC-OO1P-SPSA','MC-PX74-2Y7L','MC-Q0OL-AO0N',
-  'MC-Q2KE-UO7E','MC-RZ9P-9Y8D','MC-S1JO-312R','MC-S1W3-K2NI','MC-S3GK-PT9D',
-  'MC-S5N6-PSXN','MC-SE9B-W6GR','MC-T0ZO-LISZ','MC-T9M3-O8XI','MC-TAF9-C8BZ',
-  'MC-TDDF-NKYV','MC-TLIG-D29T','MC-UN2K-TYGA','MC-URIS-9RGY','MC-VF2A-4ATZ',
-  'MC-VRFM-QCU2','MC-WC3L-KOWQ','MC-XLUT-LS8T','MC-XOJL-QW5A','MC-XOSU-J692',
-  'MC-XSRS-N9E4','MC-YLKU-FM1M','MC-YZ1Z-CDMX','MC-Z03R-47ZH','MC-ZZ99-Z36Z'
+const _MC_H = [
+  'TUMtMDhKNy1BWENQ',
+  'TUMtMTNSWS1QWVhH',
+  'TUMtMUY4My05Nlc2',
+  'TUMtMVUwNi1ZOVM3',
+  'TUMtMkRZUi1aRktK',
+  'TUMtM0lFQi1URUFK',
+  'TUMtM0laVy1SR1A0',
+  'TUMtM1ExUS05Nkxa',
+  'TUMtM1MzUC1aTDc5',
+  'TUMtM1hHMi0xNzZN',
+  'TUMtNDBOOC1aQTM4',
+  'TUMtNE9EQi04Nkkz',
+  'TUMtNFZDTy1BTEgz',
+  'TUMtNTYwWC00SFc4',
+  'TUMtNUI1Qy03V1NJ',
+  'TUMtNVBSMC1EMThF',
+  'TUMtNkJZOC1ZTU40',
+  'TUMtNlYyQy0wVllH',
+  'TUMtN1QzSS1GMFE5',
+  'TUMtN1lDUi1VQ1gz',
+  'TUMtODZKOC1VWjEy',
+  'TUMtOFBORS1ONFZC',
+  'TUMtOThHWi1IMEFM',
+  'TUMtOUE0Ni1KRzhF',
+  'TUMtOUFNTi1FNEFV',
+  'TUMtOUM3Vi1POVg3',
+  'TUMtOUQ3OC1FMzdJ',
+  'TUMtOURaUy1ISFpa',
+  'TUMtOUlZVy02RURT',
+  'TUMtOUw5US1LRUYy',
+  'TUMtQjc4VS1ZRlZZ',
+  'TUMtQk0zRC1TSVE2',
+  'TUMtQlIxVS1GMzZW',
+  'TUMtQlk4Sy1WUEkw',
+  'TUMtQzE5Wi1WTE5O',
+  'TUMtQzg0RC1CRTkw',
+  'TUMtQ0ZPQy1ERDU4',
+  'TUMtQ1EzVC1CSTM5',
+  'TUMtQ1dVVi1JN1dD',
+  'TUMtRElSRi1CNURH',
+  'TUMtRUNNSS03WUpX',
+  'TUMtRUhKWC1LMzk5',
+  'TUMtRUpGRS0wNkdO',
+  'TUMtRVBVWC1NU0hT',
+  'TUMtRVJESS0yWVpD',
+  'TUMtRjhYWS04TFpR',
+  'TUMtRlNSMS03NVQ0',
+  'TUMtRlZTVy1SUE1H',
+  'TUMtRzRRNS1NN0RC',
+  'TUMtR0NIRS00UFJL',
+  'TUMtR0Q0OS0wUTND',
+  'TUMtR0gwTi02VU01',
+  'TUMtR1RESS1VRVFP',
+  'TUMtR1VZNC04REhK',
+  'TUMtR1k3VS02R1VM',
+  'TUMtSFVJVy1UM0k4',
+  'TUMtSjJJWC1TUUZQ',
+  'TUMtSjRMRC1FRzJa',
+  'TUMtSjdaVi1OQzdT',
+  'TUMtSkgwRy1ZRk5B',
+  'TUMtTEhTWC1XWTFF',
+  'TUMtTEtKNi1CTzEy',
+  'TUMtTUJBSC0ySDBK',
+  'TUMtTUdJSS1NSUxD',
+  'TUMtTUdKVS1BVTAz',
+  'TUMtTU5HNS04S09T',
+  'TUMtTVpMTy1EMlpJ',
+  'TUMtTjM3Ty03TzQ2',
+  'TUMtTkZENy1BMTRN',
+  'TUMtTkZMMC0zOE9B',
+  'TUMtTk9KOS1GTUcw',
+  'TUMtTlc4SS1BQzNJ',
+  'TUMtT08xUC1TUFNB',
+  'TUMtUFg3NC0yWTdM',
+  'TUMtUTBPTC1BTzBO',
+  'TUMtUTJLRS1VTzdF',
+  'TUMtUlo5UC05WThE',
+  'TUMtUzFKTy0zMTJS',
+  'TUMtUzFXMy1LMk5J',
+  'TUMtUzNHSy1QVDlE',
+  'TUMtUzVONi1QU1hO',
+  'TUMtU0U5Qi1XNkdS',
+  'TUMtVDBaTy1MSVNa',
+  'TUMtVDlNMy1POFhJ',
+  'TUMtVEFGOS1DOEJa',
+  'TUMtVERERi1OS1lW',
+  'TUMtVExJRy1EMjlU',
+  'TUMtVU4ySy1UWUdB',
+  'TUMtVVJJUy05UkdZ',
+  'TUMtVkYyQS00QVRa',
+  'TUMtVlJGTS1RQ1Uy',
+  'TUMtV0MzTC1LT1dR',
+  'TUMtWExVVC1MUzhU',
+  'TUMtWE9KTC1RVzVB',
+  'TUMtWE9TVS1KNjky',
+  'TUMtWFNSUy1OOUU0',
+  'TUMtWUxLVS1GTTFN',
+  'TUMtWVoxWi1DRE1Y',
+  'TUMtWjAzUi00N1pI',
+  'TUMtWlo5OS1aMzZa'
 ];
+
+function _chkCode(input) {
+  try { return _MC_H.includes(btoa(input)); } catch(e) { return false; }
+}
 
 function isAppUnlocked() {
   return localStorage.getItem('mc_app_unlocked') === 'true';
@@ -2794,7 +2878,7 @@ function tryMasterUnlock() {
   const err = document.getElementById('master-unlock-error');
   const code = input.value.trim().toUpperCase();
   if (!code) { err.textContent = 'কোড দিন'; return; }
-  if (APP_UNLOCK_CODES.includes(code)) {
+  if (_chkCode(code)) {
     localStorage.setItem('mc_app_unlocked', 'true');
     document.getElementById('unlock-prompt-modal').style.display = 'none';
     if (typeof burstConfetti === 'function') burstConfetti();
@@ -4639,7 +4723,7 @@ function toggleEdu(header) {
 function openContact(type) {
   if (type === 'whatsapp') {
     const msg = encodeURIComponent('আসসালামু আলাইকুম। মাস্টার কন্ট্রোল অ্যাপ থেকে যোগাযোগ করছি।');
-    window.open('https://wa.me/8801700000000?text=' + msg, '_blank');
+    window.open('https://wa.me/8801723037327?text=' + msg, '_blank');
   } else if (type === 'email') {
     window.open('mailto:support@mastercontrol.app?subject=মাস্টার কন্ট্রোল - সহায়তা', '_blank');
   }
