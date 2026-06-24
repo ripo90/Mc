@@ -406,6 +406,11 @@
   .onboard-title { font-size:28px; font-weight:700; text-align:center; margin-bottom:10px; }
   .onboard-subtitle { font-size:15px; color:var(--text2); text-align:center; line-height:1.6; margin-bottom:40px; }
 
+  @keyframes fbShimmer {
+    0% { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+
   /* ANIMATIONS */
   @keyframes pulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.05)} }
   @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
@@ -4783,28 +4788,57 @@ function openFlipbook(bookKey) {
   // Build vertical scroll pages
   const container = document.getElementById('fb-pages-container');
   container.innerHTML = '';
+
+  const scrollArea = document.getElementById('fb-scroll-area');
+  const areaW = scrollArea ? scrollArea.clientWidth || 360 : 360;
+  const imgH = Math.round(areaW * 1.414);
+
   const lazyObserver = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
         const img = entry.target;
-        if (img.dataset.src) { img.src = img.dataset.src; delete img.dataset.src; }
+        if (img.dataset.src) {
+          img.src = img.dataset.src;
+          delete img.dataset.src;
+          img.onload = () => {
+            img.style.opacity = '1';
+            const sk = img.previousElementSibling;
+            if (sk && sk.classList.contains('fb-skeleton')) sk.style.display = 'none';
+          };
+        }
         lazyObserver.unobserve(img);
       }
     });
-  }, { rootMargin: '300px' });
+  }, { rootMargin: '150px' });
+
   fbPages.forEach((src, i) => {
     const wrapper = document.createElement('div');
-    wrapper.style.cssText = 'position:relative;border-radius:10px;overflow:hidden;background:#111;min-height:180px;';
+    wrapper.style.cssText = `position:relative;border-radius:10px;overflow:hidden;background:#111;height:${imgH}px;margin-bottom:2px;`;
+
+    const skeleton = document.createElement('div');
+    skeleton.className = 'fb-skeleton';
+    skeleton.style.cssText = 'position:absolute;inset:0;background:linear-gradient(90deg,#1a1a2e 25%,#16213e 50%,#1a1a2e 75%);background-size:200% 100%;animation:fbShimmer 1.4s infinite;';
+
     const pageNum = document.createElement('div');
     pageNum.style.cssText = 'position:absolute;top:8px;right:8px;background:rgba(0,0,0,0.65);color:#ccc;font-size:10px;padding:2px 8px;border-radius:10px;z-index:2;';
     pageNum.textContent = (i+1) + ' / ' + fbPages.length;
+
     const img = document.createElement('img');
-    if (i < 2) { img.src = src; } else { img.dataset.src = src; lazyObserver.observe(img); }
     img.draggable = false;
-    img.style.cssText = 'width:100%;display:block;-webkit-user-select:none;user-select:none;';
+    img.style.cssText = 'width:100%;height:100%;object-fit:contain;display:block;-webkit-user-select:none;user-select:none;opacity:0;transition:opacity 0.3s ease;position:relative;z-index:1;';
     img.oncontextmenu = () => false;
-    wrapper.appendChild(pageNum);
+
+    if (i < 2) {
+      img.src = src;
+      img.onload = () => { img.style.opacity = '1'; skeleton.style.display = 'none'; };
+    } else {
+      img.dataset.src = src;
+      lazyObserver.observe(img);
+    }
+
+    wrapper.appendChild(skeleton);
     wrapper.appendChild(img);
+    wrapper.appendChild(pageNum);
     container.appendChild(wrapper);
   });
 
