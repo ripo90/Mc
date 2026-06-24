@@ -1775,17 +1775,17 @@
     <div style="margin:0 16px 20px; border-radius:var(--radius); background:var(--card); border:1px solid rgba(245,158,11,0.4); overflow:hidden; box-shadow:0 4px 20px rgba(245,158,11,0.1);">
       <div style="display:flex; gap:0;">
         <!-- Real Cover -->
-        <div style="width:110px; flex-shrink:0; position:relative; min-height:160px; overflow:hidden; background:linear-gradient(160deg,#1c1204,#3b2000,#1a0a00);" id="recovery-cover">
-          <img id="recovery-cover-img" src="" alt="রিকভারি সংস্করণ"
+        <div style="width:110px; flex-shrink:0; position:relative; min-height:160px; overflow:hidden; background:linear-gradient(160deg,#0d1b3e,#1a3a6e,#0a1628);" id="recovery-cover">
+          <img id="recovery-cover-img" src="images/recovery-01.jpg" alt="রিকভারি সংস্করণ"
             style="width:100%; height:100%; object-fit:cover; display:block; position:absolute; inset:0;"
-            onerror="this.style.display='none'">
-          <!-- Fallback design shown when image missing -->
-          <div id="recovery-cover-fallback" style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center;">
+            onload="document.getElementById('recovery-cover-fallback').style.display='none';"
+            onerror="this.style.display='none'; document.getElementById('recovery-cover-fallback').style.display='flex';">
+          <!-- Fallback — hidden by default, shown only if image fails -->
+          <div id="recovery-cover-fallback" style="position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center;">
             <div style="font-size:32px;margin-bottom:6px;">📖</div>
             <div style="font-size:9px;font-weight:800;color:#fcd34d;line-height:1.4;letter-spacing:0.5px;">রিকভারি<br>সংস্করণ</div>
-            <div style="position:absolute;inset:0;background:linear-gradient(135deg,rgba(245,158,11,0.15),rgba(120,53,15,0.3));"></div>
           </div>
-          <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 60%,var(--card));"></div>
+          <div style="position:absolute;inset:0;background:linear-gradient(to right,transparent 60%,var(--card));pointer-events:none;"></div>
           <div style="position:absolute; bottom:0; left:0; right:0; background:linear-gradient(transparent, rgba(28,25,23,0.95)); padding:6px 8px;">
             <span class="badge badge-gold" style="font-size:10px;">🔒 প্রিমিয়াম</span>
           </div>
@@ -4746,20 +4746,6 @@ let fbPreviewTouchX = 0;
 let fbPages = [];
 
 function initFlipbookPages() {
-  if (typeof RECOVERY_PAGES !== 'undefined') {
-    const coverImg = document.getElementById('recovery-cover-img');
-    const fallback = document.getElementById('recovery-cover-fallback');
-    if (coverImg) {
-      coverImg.src = RECOVERY_PAGES[0];
-      coverImg.onload = function() {
-        if (fallback) fallback.style.display = 'none';
-      };
-      coverImg.onerror = function() {
-        this.style.display = 'none';
-        if (fallback) fallback.style.display = 'flex';
-      };
-    }
-  }
   if (typeof MASTERCONTROL_PAGES !== 'undefined') {
     const blurImg = document.getElementById('fb-blur-img');
     if (blurImg) blurImg.src = MASTERCONTROL_PAGES[14];
