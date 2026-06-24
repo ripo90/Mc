@@ -1334,6 +1334,9 @@
         </div>
         <span class="badge badge-green" id="morning-done-badge" style="margin-left:auto;">✓ সম্পন্ন</span>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;background:rgba(16,185,129,0.15);color:var(--green);padding:3px 10px;border-radius:20px;font-weight:700;">🆓 ফ্রি</span>
+      </div>
       <button class="btn btn-primary" onclick="startKegelSession('morning')">▶ শুরু করুন</button>
     </div>
 
@@ -1346,6 +1349,9 @@
         </div>
         <span class="badge badge-purple" id="noon-done-badge" style="margin-left:auto; display:none;">✓ সম্পন্ন</span>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;background:rgba(245,158,11,0.15);color:var(--gold);padding:3px 10px;border-radius:20px;font-weight:700;">🔒 Premium</span>
+      </div>
       <button class="btn btn-outline" onclick="startKegelSession('noon')">▶ শুরু করুন</button>
     </div>
 
@@ -1357,6 +1363,9 @@
           <div style="font-size:12px; color:var(--text2);">৫ মিনিট • ঘুমের আগে</div>
         </div>
         <span class="badge badge-purple" id="night-done-badge" style="margin-left:auto; display:none;">✓ সম্পন্ন</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;">
+        <span style="font-size:11px;background:rgba(245,158,11,0.15);color:var(--gold);padding:3px 10px;border-radius:20px;font-weight:700;">🔒 Premium</span>
       </div>
       <button class="btn btn-outline" onclick="startKegelSession('night')">▶ শুরু করুন</button>
     </div>
@@ -3573,7 +3582,12 @@ function selectLevel(el, level) {
 function startKegel() { startKegelSession('morning'); }
 
 function startKegelSession(name) {
-  if (!isAppUnlocked()) { requireUnlock('কেগেল সেশন'); return; }
+  // শুধু morning session ফ্রি — noon ও night premium
+  const premiumSessions = ['noon', 'night'];
+  if (premiumSessions.includes(name) && !isAppUnlocked()) {
+    requireUnlock('দুপুর ও রাতের কেগেল সেশন');
+    return;
+  }
   sessionName = name;
   document.getElementById('kegel-session').classList.add('active');
   currentSet = 0;
