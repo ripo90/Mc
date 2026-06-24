@@ -1488,7 +1488,10 @@
         <button class="btn btn-sm" style="flex:1; background:var(--surface2); border:1.5px solid var(--border); color:var(--text);" onclick="checkin(false)">❌ না</button>
       </div>
       <textarea class="input-field" id="journal-text" rows="4" placeholder="আজ কেমন ছিলেন? কী অনুভব করলেন? লিখুন..."></textarea>
-      <button class="btn btn-primary" style="margin-top:12px;" onclick="saveJournal()">💾 সংরক্ষণ করুন</button>
+      <div style="display:flex;gap:10px;margin-top:12px;">
+        <button class="btn btn-primary" style="flex:2;" onclick="saveJournal()">💾 সংরক্ষণ করুন</button>
+        <button class="btn" style="flex:1;background:rgba(99,102,241,0.2);border:1.5px solid rgba(99,102,241,0.4);color:var(--accent);font-weight:700;" onclick="shareCurrentJournal()">📤 শেয়ার</button>
+      </div>
     </div>
 
     <!-- Calendar -->
@@ -4251,6 +4254,19 @@ function checkin(success) {
   showToast(success ? '✅ চমৎকার! ধারা চলছে: ' + state.streak + ' দিন 🔥' : '💪 হতাশ হবেন না, কাল আবার চেষ্টা করুন।');
 }
 
+function shareCurrentJournal() {
+  const text = document.getElementById('journal-text').value.trim();
+  if (!text) { showToast('⚠️ আগে কিছু লিখুন!'); return; }
+  const mood = state.moodToday || '😐';
+  const date = new Date().toLocaleDateString('bn-BD');
+  const shareText = mood + ' মাস্টার কন্ট্রোল জার্নাল — ' + date + '\n\n"' + text + '"\n\n#মাস্টারকন্ট্রোল #আত্মশুদ্ধি';
+  if (navigator.share) {
+    navigator.share({ text: shareText }).catch(() => {});
+  } else {
+    showShareModal(shareText);
+  }
+}
+
 function saveJournal() {
   const text = document.getElementById('journal-text').value.trim();
   if (!text) return;
@@ -5717,15 +5733,21 @@ const DAILY_QUOTES = [
 function updateDailyQuote() {
   const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
   const quote = DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
-  const el = document.getElementById('daily-quote-text');
-  const src = document.getElementById('daily-quote-source');
-  const badge = document.getElementById('quote-day-badge');
-  if (el) el.textContent = '"' + quote.text + '"';
-  if (src) src.textContent = quote.source;
-  if (badge) {
-    const days = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
-    badge.textContent = days[new Date().getDay()];
+  function applyQuote() {
+    const el = document.getElementById('daily-quote-text');
+    const src = document.getElementById('daily-quote-source');
+    const badge = document.getElementById('quote-day-badge');
+    if (el) el.textContent = '\u201c' + quote.text + '\u201d';
+    if (src) src.textContent = quote.source;
+    if (badge) {
+      const days = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+      badge.textContent = days[new Date().getDay()];
+    }
   }
+  applyQuote();
+  // Retry after render in case screen not visible yet
+  setTimeout(applyQuote, 300);
+  setTimeout(applyQuote, 1000);
 }
 
 // ========================
