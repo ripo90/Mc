@@ -50,7 +50,7 @@
   #app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 
   /* SCREENS — transition defined with nav styles below */
-  .screen { display:none; flex:1; overflow-y:auto; padding-bottom:20px; }
+  .screen { display:none; flex:1; overflow-y:auto; padding-bottom:80px; }
   .screen.active { display:block; }
 
   /* SCROLLBAR */
@@ -215,8 +215,7 @@
   }
   #menu-btn:active { background:rgba(99,102,241,0.2); }
 
-  /* Screen — no bottom padding needed */
-  .screen { display:none; flex:1; overflow-y:auto; padding-bottom:20px; }
+  /* Screen — fade transition */
   .screen.active {
     display:block;
     animation: screenFadeIn 0.22s ease forwards;
@@ -1233,10 +1232,29 @@
       </div>
     </div>
 
-    <!-- Motivation -->
-    <div class="card" style="background:linear-gradient(135deg,rgba(99,102,241,0.08),rgba(139,92,246,0.08)); border-color:rgba(99,102,241,0.3);">
-      <div style="font-size:20px; margin-bottom:10px; text-align:center;" id="daily-quote-icon">💎</div>
-      <div style="font-size:14px; line-height:1.7; text-align:center; font-style:italic; color:var(--text2);" id="daily-quote">আজকের একটি পদক্ষেপ আগামীকালের শক্তি।</div>
+    <!-- Daily Quote -->
+    <div style="margin:0 14px 12px;border-radius:18px;overflow:hidden;position:relative;background:linear-gradient(135deg,#0d1230,#130d2e,#0a1520);border:1px solid rgba(99,102,241,0.25);box-shadow:0 8px 32px rgba(99,102,241,0.1);">
+      <!-- Glow orb -->
+      <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;background:radial-gradient(circle,rgba(139,92,246,0.2),transparent 70%);pointer-events:none;"></div>
+      <div style="position:relative;padding:20px 20px 18px;">
+        <!-- Header -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,rgba(99,102,241,0.3),rgba(139,92,246,0.2));display:flex;align-items:center;justify-content:center;font-size:14px;">✨</div>
+            <span style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:0.08em;font-family:var(--font-ui);text-transform:uppercase;">আজকের অনুপ্রেরণা</span>
+          </div>
+          <span id="quote-day-badge" style="font-size:10px;color:var(--text3);font-family:var(--font-ui);background:rgba(255,255,255,0.05);padding:3px 10px;border-radius:20px;"></span>
+        </div>
+        <!-- Quote text -->
+        <div style="position:relative;padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;border-left:3px solid rgba(99,102,241,0.5);margin-bottom:12px;">
+          <div style="font-size:15px;line-height:1.8;color:var(--text);font-style:italic;font-weight:500;" id="daily-quote-text">লোড হচ্ছে...</div>
+        </div>
+        <!-- Source -->
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div style="width:20px;height:1px;background:rgba(99,102,241,0.4);"></div>
+          <span style="font-size:11px;color:var(--text3);font-family:var(--font-ui);" id="daily-quote-source"></span>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -5595,29 +5613,89 @@ function fbChangePage(dir) {}
 
 // Per-book unlock removed — master unlock used instead
 
-// Flipbook page animations (CSS injected via JS)
-(function() {
-  const style = document.createElement('style');
-  style.textContent = `
-    @keyframes flipLeft {
-      0%{transform:perspective(1200px) rotateY(0deg);}
-      50%{transform:perspective(1200px) rotateY(-90deg);}
-      100%{transform:perspective(1200px) rotateY(0deg);}
-    }
-    @keyframes flipRight {
-      0%{transform:perspective(1200px) rotateY(0deg);}
-      50%{transform:perspective(1200px) rotateY(90deg);}
-      100%{transform:perspective(1200px) rotateY(0deg);}
-    }
-  `;
-  document.head.appendChild(style);
-})();
+// ========================
+// DAILY QUOTE
+// ========================
+const DAILY_QUOTES = [
+  { text: "নিশ্চয়ই আল্লাহ তাদের সাথে আছেন যারা ধৈর্য ধারণ করে।", source: "সূরা আল-বাকারা ২:১৫৩" },
+  { text: "যে নিজেকে নিয়ন্ত্রণ করতে পারে, সে সবকিছু জয় করতে পারে।", source: "ইমাম গাযালী" },
+  { text: "প্রতিটি কষ্টের সাথে স্বস্তি আছে। নিশ্চয়ই প্রতিটি কষ্টের সাথে স্বস্তি আছে।", source: "সূরা আল-ইনশিরাহ ৯৪:৫-৬" },
+  { text: "শক্তিশালী মুমিন দুর্বল মুমিনের চেয়ে আল্লাহর কাছে বেশি প্রিয়।", source: "সহীহ মুসলিম" },
+  { text: "যে ব্যক্তি নিজের প্রবৃত্তিকে দমন করতে পারে, সে প্রকৃত বীর।", source: "হযরত আলী রা." },
+  { text: "ছোট ছোট পদক্ষেপ নিয়মিত নেওয়াই বড় পরিবর্তনের রহস্য।", source: "মাস্টার কন্ট্রোল" },
+  { text: "আল্লাহ কোনো জাতির অবস্থা পরিবর্তন করেন না, যতক্ষণ না তারা নিজেরা নিজেদের পরিবর্তন করে।", source: "সূরা আর-রাদ ১৩:১১" },
+  { text: "প্রতিটি ফজরের নামাজ একটি নতুন সুযোগ — গতকালের ভুল আজ শোধরানোর।", source: "মাস্টার কন্ট্রোল" },
+  { text: "তোমার শরীর তোমার আমানত। এটার যত্ন নাও।", source: "হাদিস অনুপ্রাণিত" },
+  { text: "ধৈর্য হলো অর্ধেক ঈমান।", source: "সহীহ বুখারী" },
+  { text: "যে ব্যক্তি আজকে নিজের সাথে সৎ, সে আগামীকাল সফল।", source: "ইবনুল কাইয়্যিম" },
+  { text: "একটি খারাপ অভ্যাস ভাঙতে ২১ দিন লাগে। তুমি ইতিমধ্যে শুরু করেছ।", source: "মাস্টার কন্ট্রোল" },
+  { text: "নিশ্চয়ই আল্লাহ তাওবাকারীদের ভালোবাসেন এবং পবিত্রতা অবলম্বনকারীদের ভালোবাসেন।", source: "সূরা আল-বাকারা ২:২২২" },
+  { text: "প্রতিটি মুহূর্ত একটি নতুন সুযোগ — এটা নষ্ট করো না।", source: "ইমাম শাফেয়ী" },
+  { text: "কঠিন সময়ে যে টিকে থাকে, সে-ই প্রকৃত বিজয়ী।", source: "মাস্টার কন্ট্রোল" },
+  { text: "যে ব্যক্তি আল্লাহর উপর ভরসা রাখে, তার জন্য তিনিই যথেষ্ট।", source: "সূরা আত-তালাক ৬৫:৩" },
+  { text: "তোমার মন তোমার সবচেয়ে বড় শক্তি — একে সুস্থ রাখো।", source: "মাস্টার কন্ট্রোল" },
+  { text: "গুনাহ থেকে তওবা করো এবং আর ফিরে যেও না — প্রতিদিন এটাই লক্ষ্য।", source: "হাদিস অনুপ্রাণিত" },
+  { text: "শয়তান চায় তুমি হাল ছেড়ে দাও। তোমার প্রতিরোধই তার পরাজয়।", source: "ইবনুল কাইয়্যিম" },
+  { text: "দুনিয়ায় যে পরিশ্রম করে, আখিরাতে সে ফল পাবে।", source: "সহীহ বুখারী অনুপ্রাণিত" },
+  { text: "আজকের একটি ভালো কাজ আগামীকালের আরেকটি ভালো কাজের দরজা খুলে দেয়।", source: "মাস্টার কন্ট্রোল" },
+  { text: "নিজেকে ক্ষমা করো, কিন্তু নিজেকে ভুলে যেও না।", source: "মাস্টার কন্ট্রোল" },
+  { text: "যে তার দৃষ্টি সংযত রাখে, আল্লাহ তার অন্তরে নূর দান করেন।", source: "হাদিস অনুপ্রাণিত" },
+  { text: "প্রতিটি সূর্যোদয় একটি নতুন সুযোগ — গতকালের হিসাব নতুন করে শুরু করার।", source: "মাস্টার কন্ট্রোল" },
+  { text: "যে ব্যক্তি আল্লাহর ভয়ে পাপ ছেড়ে দেয়, আল্লাহ তাকে এর চেয়ে উত্তম বিকল্প দেন।", source: "হাদিস অনুপ্রাণিত" },
+  { text: "তোমার সংগ্রাম তোমার শক্তির প্রমাণ — দুর্বলরা সংগ্রাম করে না।", source: "মাস্টার কন্ট্রোল" },
+  { text: "জ্ঞান অর্জন করা প্রতিটি মুসলিমের উপর ফরজ।", source: "সুনানে ইবনে মাজাহ" },
+  { text: "অধৈর্য হয়ো না — সবচেয়ে অন্ধকার রাতের পরেই ভোর আসে।", source: "মাস্টার কন্ট্রোল" },
+  { text: "তোমার দোয়া কবুল হচ্ছে — হয়তো এখনই, হয়তো পরে, হয়তো এর চেয়ে ভালো কিছু দিয়ে।", source: "হাদিস অনুপ্রাণিত" },
+  { text: "আজকে যে বীজ বুনছ, কালকে তার ফল পাবে — ধৈর্য রাখো।", source: "মাস্টার কন্ট্রোল" },
+];
+
+function updateDailyQuote() {
+  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  const quote = DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
+  const el = document.getElementById('daily-quote-text');
+  const src = document.getElementById('daily-quote-source');
+  const badge = document.getElementById('quote-day-badge');
+  if (el) el.textContent = '"' + quote.text + '"';
+  if (src) src.textContent = quote.source;
+  if (badge) {
+    const days = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+    badge.textContent = days[new Date().getDay()];
+  }
+}
+
+// ========================
+// WARM TAP SOUND
+// ========================
+let _ac;
+function getAC() {
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
+  return _ac;
+}
+function playWarmTap() {
+  try {
+    const ac = getAC();
+    if (ac.state === 'suspended') ac.resume();
+    const freqs = [440, 550];
+    freqs.forEach((f, i) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = 'triangle'; o.frequency.value = f;
+      const t = ac.currentTime + i * 0.04;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.18, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+      o.start(t); o.stop(t + 0.4);
+    });
+  } catch(e) {}
+}
 
 // ========================
 // RIPPLE EFFECT
 // ========================
 function attachRipple(el) {
   el.addEventListener('pointerdown', function(e) {
+    playWarmTap();
     const r = el.getBoundingClientRect();
     const size = Math.max(r.width, r.height);
     const x = e.clientX - r.left - size / 2;
@@ -5631,7 +5709,23 @@ function attachRipple(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  document.querySelectorAll('.btn, button.nav-item').forEach(attachRipple);
+  // Initial attach
+  document.querySelectorAll('.btn').forEach(el => {
+    el.dataset.ripple = '1';
+    attachRipple(el);
+  });
+  // Nav items sound only (no ripple needed)
+  document.querySelectorAll('.nav-item').forEach(el => {
+    el.addEventListener('pointerdown', playWarmTap);
+  });
+  // Watch for dynamically added buttons
+  const observer = new MutationObserver(() => {
+    document.querySelectorAll('.btn:not([data-ripple])').forEach(el => {
+      el.dataset.ripple = '1';
+      attachRipple(el);
+    });
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 });
 
 // PWA SERVICE WORKER — only on real hosting, not claude.ai preview
