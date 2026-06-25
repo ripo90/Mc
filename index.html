@@ -2475,26 +2475,48 @@
       <!-- Reminders -->
       <div style="padding:18px 16px; border-bottom:1px solid var(--border);">
         <div style="font-size:11px; font-weight:700; color:var(--text3); letter-spacing:1px; margin-bottom:14px;">রিমাইন্ডার</div>
+        <!-- Notification Permission Button -->
+        <div id="notif-permission-row" style="padding:0 0 14px; border-bottom:1px solid var(--border); margin-bottom:14px;">
+          <button class="btn btn-outline" onclick="requestNotifPermission()" id="notif-perm-btn" style="width:100%; font-size:13px;">
+            🔔 নোটিফিকেশন চালু করুন
+          </button>
+          <div id="notif-perm-status" style="font-size:11px; color:var(--text3); margin-top:6px; text-align:center;"></div>
+        </div>
+
+        <!-- Reminder 1 -->
         <div class="settings-row" style="padding:0 0 12px; border-bottom:1px solid var(--border);">
           <div>
-            <div class="settings-label">সকালের রিমাইন্ডার</div>
-            <div class="settings-sub">ফজরের পর কেগেল</div>
+            <div class="settings-label">১ম রিমাইন্ডার</div>
+            <div class="settings-sub">কেগেল করার সময়</div>
           </div>
-          <label class="toggle"><input type="checkbox" id="reminder-morning" checked onchange="saveSettings()"><div class="toggle-slider"></div></label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="time" id="reminder-time-1" value="08:00" onchange="saveSettings()" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:6px 10px; font-size:13px; font-family:inherit;">
+            <label class="toggle"><input type="checkbox" id="reminder-morning" checked onchange="saveSettings()"><div class="toggle-slider"></div></label>
+          </div>
         </div>
+
+        <!-- Reminder 2 -->
         <div class="settings-row" style="padding:12px 0 12px; border-bottom:1px solid var(--border);">
           <div>
-            <div class="settings-label">দুপুরের রিমাইন্ডার</div>
-            <div class="settings-sub">যোহরের পর</div>
+            <div class="settings-label">২য় রিমাইন্ডার</div>
+            <div class="settings-sub">কেগেল করার সময়</div>
           </div>
-          <label class="toggle"><input type="checkbox" id="reminder-noon" onchange="saveSettings()"><div class="toggle-slider"></div></label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="time" id="reminder-time-2" value="13:00" onchange="saveSettings()" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:6px 10px; font-size:13px; font-family:inherit;">
+            <label class="toggle"><input type="checkbox" id="reminder-noon" onchange="saveSettings()"><div class="toggle-slider"></div></label>
+          </div>
         </div>
+
+        <!-- Reminder 3 -->
         <div class="settings-row" style="padding:12px 0 0; border:none;">
           <div>
-            <div class="settings-label">রাতের রিমাইন্ডার</div>
-            <div class="settings-sub">ঘুমের আগে</div>
+            <div class="settings-label">৩য় রিমাইন্ডার</div>
+            <div class="settings-sub">কেগেল করার সময়</div>
           </div>
-          <label class="toggle"><input type="checkbox" id="reminder-night" checked onchange="saveSettings()"><div class="toggle-slider"></div></label>
+          <div style="display:flex; align-items:center; gap:8px;">
+            <input type="time" id="reminder-time-3" value="21:00" onchange="saveSettings()" style="background:var(--surface2); border:1px solid var(--border); border-radius:8px; color:var(--text); padding:6px 10px; font-size:13px; font-family:inherit;">
+            <label class="toggle"><input type="checkbox" id="reminder-night" checked onchange="saveSettings()"><div class="toggle-slider"></div></label>
+          </div>
         </div>
       </div>
 
@@ -3483,6 +3505,7 @@ function showScreen(id) {
   if (id === 'kegel') { setTimeout(() => renderMuscleGuide(1), 100); initChallenge(); }
   if (id === 'edu')   setTimeout(() => renderMuscleGuide(2), 100);
   if (id === 'journey') renderJourneyFeed();
+  if (id === 'settings') setTimeout(() => updateNotifPermStatus(), 100);
 }
 
 // =====================
@@ -3498,6 +3521,7 @@ function initApp() {
   buildBarCharts();
   loadSettingsUI();
   updateAchievements();
+  scheduleNotifications();
   // Init muscle guides with user's gender preference
   const g = state.user.gender || 'male';
   mgGender  = g; mg2Gender  = g;
@@ -5325,6 +5349,71 @@ function loadSettingsUI() {
   document.getElementById('reminder-night').checked = state.settings.reminders.night;
   document.getElementById('vibration').checked = state.settings.vibration;
   document.getElementById('sound').checked = state.settings.sound;
+  if (state.settings.reminderTimes) {
+    document.getElementById('reminder-time-1').value = state.settings.reminderTimes[0] || '08:00';
+    document.getElementById('reminder-time-2').value = state.settings.reminderTimes[1] || '13:00';
+    document.getElementById('reminder-time-3').value = state.settings.reminderTimes[2] || '21:00';
+  }
+}
+
+function updateNotifPermStatus() {
+  const btn = document.getElementById('notif-perm-btn');
+  const status = document.getElementById('notif-perm-status');
+  if (!btn || !status) return;
+  if (!('Notification' in window)) {
+    status.textContent = '❌ এই browser এ notification সাপোর্ট নেই';
+    btn.style.display = 'none';
+    return;
+  }
+  if (Notification.permission === 'granted') {
+    btn.textContent = '✅ নোটিফিকেশন চালু আছে';
+    btn.style.background = 'rgba(34,197,94,0.1)';
+    btn.style.borderColor = 'rgba(34,197,94,0.4)';
+    btn.style.color = '#4ade80';
+    status.textContent = 'সময় সেট করুন এবং সেটিংস সংরক্ষণ করুন';
+  } else if (Notification.permission === 'denied') {
+    btn.textContent = '🔕 নোটিফিকেশন বন্ধ আছে';
+    status.textContent = 'Phone settings থেকে Chrome এর notification চালু করুন';
+  } else {
+    btn.textContent = '🔔 নোটিফিকেশন চালু করুন';
+    status.textContent = '';
+  }
+}
+
+async function requestNotifPermission() {
+  if (!('Notification' in window)) { showToast('❌ এই browser এ notification নেই'); return; }
+  if (Notification.permission === 'granted') { showToast('✅ ইতিমধ্যে চালু আছে'); return; }
+  const perm = await Notification.requestPermission();
+  updateNotifPermStatus();
+  if (perm === 'granted') { showToast('✅ নোটিফিকেশন চালু হয়েছে!'); scheduleNotifications(); }
+  else showToast('❌ অনুমতি দেওয়া হয়নি');
+}
+
+function scheduleNotifications() {
+  if (window._notifTimers) window._notifTimers.forEach(clearTimeout);
+  window._notifTimers = [];
+  if (!('Notification' in window)) return;
+  if (Notification.permission !== 'granted') return;
+  const times = state.settings.reminderTimes || ['08:00','13:00','21:00'];
+  const enabled = [state.settings.reminders.morning, state.settings.reminders.noon, state.settings.reminders.night];
+  const msgs = [
+    '💪 সময় হয়েছে কেগেল করার! ছোট্ট ৫ মিনিট — বড় পরিবর্তন।',
+    '🌟 দুপুরের কেগেল রিমাইন্ডার — এখনই করে নিন!',
+    '🌙 রাতের কেগেল সেশন বাকি আছে — শেষ করুন আজকেই।'
+  ];
+  times.forEach((time, i) => {
+    if (!enabled[i]) return;
+    const [h, m] = time.split(':').map(Number);
+    const now = new Date(), target = new Date();
+    target.setHours(h, m, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    const t = setTimeout(() => {
+      playNotifChime();
+      new Notification('মাস্টার কন্ট্রোল 💪', { body: msgs[i], icon: 'icon-192.png', vibrate: [200,100,200] });
+      scheduleNotifications();
+    }, target - now);
+    window._notifTimers.push(t);
+  });
 }
 
 function setGenderSettings(g) {
@@ -5349,7 +5438,13 @@ function saveSettings() {
   state.settings.reminders.night = document.getElementById('reminder-night').checked;
   state.settings.vibration = document.getElementById('vibration').checked;
   state.settings.sound = document.getElementById('sound').checked;
+  state.settings.reminderTimes = [
+    document.getElementById('reminder-time-1').value || '08:00',
+    document.getElementById('reminder-time-2').value || '13:00',
+    document.getElementById('reminder-time-3').value || '21:00'
+  ];
   saveState();
+  scheduleNotifications();
 }
 
 function saveProfileSettings() {
@@ -5762,17 +5857,35 @@ function playWarmTap() {
   try {
     const ac = getAC();
     if (ac.state === 'suspended') ac.resume();
-    const freqs = [440, 550];
+    const freqs = [523.25, 659.25, 783.99];
     freqs.forEach((f, i) => {
       const o = ac.createOscillator();
       const g = ac.createGain();
       o.connect(g); g.connect(ac.destination);
-      o.type = 'triangle'; o.frequency.value = f;
-      const t = ac.currentTime + i * 0.04;
+      o.type = 'sine'; o.frequency.value = f;
+      const t = ac.currentTime + i * 0.06;
       g.gain.setValueAtTime(0, t);
-      g.gain.linearRampToValueAtTime(0.18, t + 0.01);
-      g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-      o.start(t); o.stop(t + 0.4);
+      g.gain.linearRampToValueAtTime(0.08, t + 0.03);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+      o.start(t); o.stop(t + 1.2);
+    });
+  } catch(e) {}
+}
+
+function playNotifChime() {
+  try {
+    const ac = getAC();
+    if (ac.state === 'suspended') ac.resume();
+    [523.25, 783.99].forEach((f, i) => {
+      const o = ac.createOscillator();
+      const g = ac.createGain();
+      o.connect(g); g.connect(ac.destination);
+      o.type = 'sine'; o.frequency.value = f;
+      const t = ac.currentTime + i * 0.2;
+      g.gain.setValueAtTime(0, t);
+      g.gain.linearRampToValueAtTime(0.12, t + 0.05);
+      g.gain.exponentialRampToValueAtTime(0.001, t + 1.5);
+      o.start(t); o.stop(t + 1.5);
     });
   } catch(e) {}
 }
