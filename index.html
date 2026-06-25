@@ -49,8 +49,9 @@
   /* APP WRAPPER */
   #app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 
-  /* SCREENS */
+  /* SCREENS — transition defined with nav styles below */
   .screen { display:none; flex:1; overflow-y:auto; padding-bottom:80px; }
+  .screen.active { display:block; }
 
   /* SCROLLBAR */
   .screen::-webkit-scrollbar { width:2px; }
@@ -241,25 +242,12 @@
 
   /* CARDS */
   .card {
-    background:linear-gradient(160deg,#0f1d2e,#0a1520);
-    border:1px solid rgba(99,102,241,0.12);
+    background:var(--card);
+    border:1px solid rgba(255,255,255,0.05);
     border-radius:var(--radius);
     padding:20px;
     margin:0 14px 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    position:relative; overflow:hidden;
-  }
-  .card::before {
-    content:'';
-    position:absolute;
-    top:0; left:10%; right:10%; height:1px;
-    background:linear-gradient(90deg,transparent,rgba(99,102,241,0.4),transparent);
-    pointer-events:none;
-  }
-  .card:active {
-    transform: scale(0.985);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
   }
   .card-title {
     font-size:13px; font-weight:600;
@@ -374,6 +362,27 @@
     to { transform:scale(4); opacity:0; }
   }
 
+  /* Card press effect */
+  .card {
+    background:linear-gradient(160deg,#0f1d2e,#0a1520);
+    border:1px solid rgba(99,102,241,0.12);
+    border-radius:var(--radius);
+    padding:20px;
+    margin:0 14px 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position:relative; overflow:hidden;
+  }
+  .card::before {
+    content:'';
+    position:absolute;
+    top:0; left:10%; right:10%; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(99,102,241,0.4),transparent);
+  }
+  .card:active {
+    transform: scale(0.985);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
+  }
   .tabs { display:flex; gap:8px; padding:0 14px 16px; overflow-x:auto; }
   .tabs::-webkit-scrollbar { display:none; }
   .tab {
@@ -617,8 +626,10 @@
   /* ONBOARDING */
   #onboarding {
     position:fixed; inset:0; background:var(--bg); z-index:1000;
-    display:flex; flex-direction:column; padding:40px 24px;
-    align-items:center; justify-content:center;
+    display:flex; flex-direction:column;
+    align-items:center;
+    overflow-y:auto;
+    padding:40px 24px 60px;
   }
   .onboard-logo { font-size:64px; margin-bottom:20px; }
   .onboard-title { font-size:28px; font-weight:700; text-align:center; margin-bottom:10px; }
@@ -952,7 +963,7 @@
       <button class="btn btn-outline btn-sm" style="flex:1; font-size:14px;" onclick="setGender('female')" id="btn-female">নারী</button>
     </div>
   </div>
-  <div style="width:100%;margin:14px 0;padding:14px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:14px;text-align:center;"><div style="font-size:10px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-bottom:7px;">✨ আজকের অনুপ্রেরণা</div><div id="onboard-quote-text" style="font-size:13px;line-height:1.7;color:var(--text);font-style:italic;"></div><div id="onboard-quote-source" style="font-size:11px;color:var(--text3);margin-top:5px;"></div></div>
+
   <button class="btn btn-primary" onclick="finishOnboarding()">শুরু করি →</button>
 </div>
 
@@ -1239,7 +1250,7 @@
         </div>
         <!-- Quote text -->
         <div style="position:relative;padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;border-left:3px solid rgba(99,102,241,0.5);margin-bottom:12px;">
-          <div style="font-size:15px;line-height:1.8;color:var(--text);font-style:italic;font-weight:500;" id="daily-quote-text"></div>
+          <div style="font-size:15px;line-height:1.8;color:var(--text);font-style:italic;font-weight:500;" id="daily-quote-text">লোড হচ্ছে...</div>
         </div>
         <!-- Source -->
         <div style="display:flex;align-items:center;gap:6px;">
@@ -5476,7 +5487,6 @@ if (!state.disclaimerSeen) {
 } else if (!state.onboarded) {
   document.getElementById('disclaimer-screen').style.display = 'none';
   document.getElementById('app').style.display = 'none';
-  setTimeout(updateDailyQuote, 100);
 } else {
   document.getElementById('disclaimer-screen').style.display = 'none';
   document.getElementById('onboarding').style.display = 'none';
@@ -5494,7 +5504,6 @@ function dismissDisclaimer() {
     if (!state.onboarded) {
       document.getElementById('app').style.display = 'none';
       document.getElementById('onboarding').style.display = 'flex';
-      setTimeout(updateDailyQuote, 100);
     } else {
       document.getElementById('onboarding').style.display = 'none';
       document.getElementById('app').style.display = 'flex';
@@ -5678,7 +5687,7 @@ function fbChangePage(dir) {}
 // ========================
 // DAILY QUOTE
 // ========================
-var DAILY_QUOTES = [
+const DAILY_QUOTES = [
   // চোখের পর্দা ও দৃষ্টি সংযত রাখা
   { text: "মুমিন পুরুষদের বলুন, তারা যেন তাদের দৃষ্টি সংযত রাখে এবং তাদের লজ্জাস্থান হেফাজত করে। এটাই তাদের জন্য পবিত্রতর। নিশ্চয়ই আল্লাহ তাদের কাজকর্ম সম্পর্কে সম্যক অবহিত।", source: "সূরা আন-নূর ২৪:৩০" },
   { text: "মুমিন নারীদের বলুন, তারা যেন তাদের দৃষ্টি সংযত রাখে, তাদের লজ্জাস্থান হেফাজত করে।", source: "সূরা আন-নূর ২৪:৩১" },
@@ -5730,12 +5739,8 @@ function updateDailyQuote() {
   var q = DAILY_QUOTES[dy % DAILY_QUOTES.length];
   var wk = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
   function ap() {
-    ['daily-quote-text','onboard-quote-text'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.textContent='“'+q.text+'”';
-    });
-    ['daily-quote-source','onboard-quote-source'].forEach(function(id){
-      var el=document.getElementById(id); if(el) el.textContent='— '+q.source;
-    });
+    var el=document.getElementById('daily-quote-text'); if(el) el.textContent='"'+q.text+'"';
+    var es=document.getElementById('daily-quote-source'); if(es) es.textContent='— '+q.source;
     var b=document.getElementById('quote-day-badge'); if(b) b.textContent=wk[new Date().getDay()];
   }
   ap(); setTimeout(ap, 500);
@@ -5744,7 +5749,7 @@ function updateDailyQuote() {
 // ========================
 // WARM TAP SOUND
 // ========================
-var _ac;
+let _ac;
 function getAC() {
   if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
   if (_ac.state === 'suspended') _ac.resume();
@@ -5791,6 +5796,7 @@ function attachRipple(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  updateDailyQuote();
   // Initial attach
   document.querySelectorAll('.btn').forEach(el => {
     el.dataset.ripple = '1';
