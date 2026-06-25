@@ -2,7 +2,7 @@
   "name": "মাস্টার কন্ট্রোল",
   "short_name": "মাস্টার কন্ট্রোল",
   "description": "আত্মশুদ্ধি ও নফস কন্ট্রোলের সঙ্গী",
-  "start_url": "./index-1.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#080d18",
   "theme_color": "#0f172a",
