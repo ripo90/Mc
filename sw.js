@@ -1,7 +1,7 @@
-const CACHE_NAME = 'master-control-v1';
+const CACHE_NAME = 'master-control-v3';
 const ASSETS = [
   './',
-  './index-1.html',
+  './index.html',
   'https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@300;400;500;600;700;800&family=Hind+Siliguri:wght@400;500;600&display=swap',
 ];
 
@@ -25,27 +25,23 @@ self.addEventListener('activate', event => {
   self.clients.claim();
 });
 
-// Fetch: serve from cache, fallback to network, then cache new responses
+// Fetch: network first, fallback to cache
 self.addEventListener('fetch', event => {
-  // Skip non-GET and chrome-extension requests
   if (event.request.method !== 'GET') return;
   if (event.request.url.startsWith('chrome-extension://')) return;
 
   event.respondWith(
-    caches.match(event.request).then(cached => {
-      if (cached) return cached;
-
-      return fetch(event.request).then(response => {
-        // Cache valid responses
-        if (response && response.status === 200 && response.type !== 'opaque') {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        }
-        return response;
-      }).catch(() => {
-        // Offline fallback for navigation requests
+    fetch(event.request).then(response => {
+      if (response && response.status === 200 && response.type !== 'opaque') {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
+      }
+      return response;
+    }).catch(() => {
+      return caches.match(event.request).then(cached => {
+        if (cached) return cached;
         if (event.request.mode === 'navigate') {
-          return caches.match('./index-1.html');
+          return caches.match('./index.html');
         }
       });
     })
