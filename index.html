@@ -961,12 +961,7 @@
       <button class="btn btn-outline btn-sm" style="flex:1; font-size:14px;" onclick="setGender('female')" id="btn-female">নারী</button>
     </div>
   </div>
-  <!-- Daily Quote on Onboarding -->
-  <div style="width:100%;margin-top:20px;margin-bottom:20px;padding:16px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:16px;text-align:center;">
-    <div style="font-size:10px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-bottom:8px;">✨ আজকের অনুপ্রেরণা</div>
-    <div id="onboard-quote-text" style="font-size:13px;line-height:1.7;color:var(--text);font-style:italic;"></div>
-    <div id="onboard-quote-source" style="font-size:11px;color:var(--text3);margin-top:6px;"></div>
-  </div>
+  <div style="width:100%;margin:14px 0;padding:14px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.2);border-radius:14px;text-align:center;"><div style="font-size:10px;color:var(--accent);font-weight:700;letter-spacing:1px;margin-bottom:7px;">✨ আজকের অনুপ্রেরণা</div><div id="onboard-quote-text" style="font-size:13px;line-height:1.7;color:var(--text);font-style:italic;"></div><div id="onboard-quote-source" style="font-size:11px;color:var(--text3);margin-top:5px;"></div></div>
   <button class="btn btn-primary" onclick="finishOnboarding()">শুরু করি →</button>
 </div>
 
@@ -1494,10 +1489,7 @@
         <button class="btn btn-sm" style="flex:1; background:var(--surface2); border:1.5px solid var(--border); color:var(--text);" onclick="checkin(false)">❌ না</button>
       </div>
       <textarea class="input-field" id="journal-text" rows="4" placeholder="আজ কেমন ছিলেন? কী অনুভব করলেন? লিখুন..."></textarea>
-      <div style="display:flex;gap:10px;margin-top:12px;">
-        <button class="btn btn-primary" style="flex:2;" onclick="saveJournal()">💾 সংরক্ষণ করুন</button>
-        <button class="btn" style="flex:1;background:rgba(99,102,241,0.2);border:1.5px solid rgba(99,102,241,0.4);color:var(--accent);font-weight:700;" onclick="shareCurrentJournal()">📤 শেয়ার</button>
-      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;"><button class="btn btn-primary" style="flex:2;" onclick="saveJournal()">&#55357;&#56510; সংরক্ষণ করুন</button><button class="btn" style="flex:1;background:rgba(99,102,241,0.2);border:1.5px solid rgba(99,102,241,0.4);color:var(--accent);font-weight:700;" onclick="shareCurrentJournal()">শেয়ার</button></div>
     </div>
 
     <!-- Calendar -->
@@ -3263,16 +3255,17 @@ function renderJourneyFeed() {
     return;
   }
   feed.innerHTML = posts.map(p => `
-    <div class="card" style="position:relative;">
+    <div class="card" style="position:relative;padding-bottom:54px;">
       <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
         <div style="width:38px; height:38px; border-radius:50%; background:linear-gradient(135deg,var(--accent),var(--accent2)); display:flex; align-items:center; justify-content:center; font-size:16px; font-weight:700; color:#fff; flex-shrink:0;">${p.name.charAt(0)}</div>
         <div>
           <div style="font-size:14px; font-weight:700;">${p.name}</div>
           <div style="font-size:11px; color:var(--text3); font-family:var(--font-ui);">${p.date}</div>
         </div>
+        <button onclick="deleteJourneyPost(${p.id})" style="margin-left:auto;background:none;border:none;color:var(--text3);font-size:16px;cursor:pointer;">🗑</button>
       </div>
       <div style="font-size:14px; line-height:1.8; color:var(--text2);">${p.text.replace(/\n/g,'<br>')}</div>
-      <button onclick="deleteJourneyPost(${p.id})" style="position:absolute; top:14px; right:14px; background:none; border:none; color:var(--text3); font-size:16px; cursor:pointer;">🗑</button>
+      <button onclick="doShare('${p.name.replace(/'/g,'')} \u09b2\u09bf\u0996\u09c7\u099b\u09c7\u09a8 \u2014 '+p.date+'\\n\\n\u201c'+p.text+'\u201d\\n\\n#\u09ae\u09be\u09b8\u09cd\u099f\u09be\u09b0\u0995\u09a8\u09cd\u099f\u09cd\u09b0\u09cb\u09b2')" style="position:absolute;bottom:14px;left:14px;right:14px;padding:10px;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:10px;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;width:calc(100% - 28px);">শেয়ার করুন</button>
     </div>
   `).join('');
 }
@@ -3509,6 +3502,7 @@ function initApp() {
   setTimeout(() => { renderMuscleGuide(1); renderMuscleGuide(2); }, 200);
   // Init flipbook pages
   initFlipbookPages();
+  setTimeout(updateDailyQuote, 100);
 }
 
 function updateDateBar() {
@@ -4259,69 +4253,55 @@ function checkin(success) {
 }
 
 function shareCurrentJournal() {
-  const text = (document.getElementById('journal-text')||{}).value || '';
-  const t = text.trim();
-  if (!t) { showToast('⚠️ আগে কিছু লিখুন!'); return; }
-  const mood = state.moodToday || '🤲';
-  const date = new Date().toLocaleDateString('bn-BD', {year:'numeric',month:'long',day:'numeric'});
-  doShare(mood + ' জার্নাল — ' + date + '\n\n"' + t + '"\n\n#মাস্টারকন্ট্রোল');
+  var t=((document.getElementById('journal-text')||{}).value||'').trim();
+  if(!t){showToast('আগে কিছু লিখুন!');return;}
+  var d=new Date().toLocaleDateString('bn-BD',{year:'numeric',month:'long',day:'numeric'});
+  doShare((state.moodToday||'')+' জার্নাল — '+d+'\n\n“'+t+'”\n\n#মাস্টারকন্ট্রোল');
 }
-
 function shareJournalEntry(i) {
-  const j = state.journals[i];
-  if (!j) return;
-  doShare(j.mood + ' জার্নাল — ' + j.date + '\n\n"' + j.text + '"\n\n#মাস্টারকন্ট্রোল');
+  var j=state.journals[i];if(!j)return;
+  doShare(j.mood+' জার্নাল — '+j.date+'\n\n“'+j.text+'”\n\n#মাস্টারকন্ট্রোল');
 }
-
 function doShare(txt) {
-  if (navigator.share) {
-    navigator.share({ text: txt }).catch(function(){});
+  var FB_GROUP = 'https://www.facebook.com/share/g/19rxS9ubJa/';
+  if(navigator.share){
+    navigator.share({text:txt+'
+
+'+FB_GROUP}).catch(function(){});
     return;
   }
-  var old = document.getElementById('_share_modal');
-  if (old) old.remove();
-  // Store text globally to avoid quote nesting issues
-  window._shareText = txt;
-  var m = document.createElement('div');
-  m.id = '_share_modal';
-  m.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;align-items:flex-end;justify-content:center;padding:16px;';
-  var box = document.createElement('div');
-  box.style.cssText = 'background:var(--card);border:1px solid var(--border);border-radius:20px 20px 12px 12px;padding:20px;width:100%;max-width:420px;';
-  var title = document.createElement('div');
-  title.style.cssText = 'font-size:15px;font-weight:800;margin-bottom:12px;';
-  title.textContent = '📤 শেয়ার করুন';
-  var ta = document.createElement('textarea');
-  ta.id = '_stxt';
-  ta.readOnly = true;
-  ta.value = txt;
-  ta.style.cssText = 'width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-size:12px;font-family:inherit;line-height:1.6;resize:none;height:100px;margin-bottom:12px;';
-  var row = document.createElement('div');
-  row.style.cssText = 'display:flex;gap:8px;';
-  var btnCopy = document.createElement('button');
-  btnCopy.style.cssText = 'flex:1;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
-  btnCopy.textContent = '📋 কপি';
-  btnCopy.onclick = function() {
-    navigator.clipboard && navigator.clipboard.writeText(window._shareText).then(function(){ showToast('✅ কপি হয়েছে!'); }).catch(function(){});
-  };
-  var btnWA = document.createElement('button');
-  btnWA.style.cssText = 'flex:1;padding:12px;background:#075e54;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
-  btnWA.textContent = '💬 WhatsApp';
-  btnWA.onclick = function() { window.open('https://wa.me/?text=' + encodeURIComponent(window._shareText), '_blank'); };
-  var btnClose = document.createElement('button');
-  btnClose.style.cssText = 'width:100%;margin-top:8px;padding:10px;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;';
-  btnClose.textContent = 'বাতিল';
-  btnClose.onclick = function() { m.remove(); };
-  row.appendChild(btnCopy);
-  row.appendChild(btnWA);
-  box.appendChild(title);
-  box.appendChild(ta);
-  box.appendChild(row);
-  box.appendChild(btnClose);
-  m.appendChild(box);
-  document.body.appendChild(m);
-  m.addEventListener('click', function(e){ if(e.target===m) m.remove(); });
-}
+  window._st = txt + '
 
+' + FB_GROUP;
+  var e=document.getElementById('_sm');if(e)e.remove();
+  var m=document.createElement('div');m.id='_sm';
+  m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;align-items:flex-end;justify-content:center;padding:16px;';
+  var bx=document.createElement('div');
+  bx.style.cssText='background:var(--card);border:1px solid var(--border);border-radius:20px 20px 12px 12px;padding:20px;width:100%;max-width:420px;';
+  var h=document.createElement('div');h.style.cssText='font-size:15px;font-weight:800;margin-bottom:12px;';h.textContent='শেয়ার করুন';
+  var ta=document.createElement('textarea');ta.readOnly=true;ta.value=window._st;
+  ta.style.cssText='width:100%;box-sizing:border-box;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px;color:var(--text);font-size:12px;font-family:inherit;resize:none;height:110px;margin-bottom:12px;';
+  var row=document.createElement('div');row.style.cssText='display:flex;gap:8px;';
+  var bc=document.createElement('button');
+  bc.style.cssText='flex:1;padding:12px;background:var(--accent);border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
+  bc.textContent='কপি করুন';
+  bc.onclick=function(){navigator.clipboard&&navigator.clipboard.writeText(window._st).then(function(){showToast('কপি হয়েছে!');});};
+  var bw=document.createElement('button');
+  bw.style.cssText='flex:1;padding:12px;background:#075e54;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
+  bw.textContent='WhatsApp';
+  bw.onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent(window._st),'_blank');};
+  var bf=document.createElement('button');
+  bf.style.cssText='width:100%;margin-top:8px;padding:12px;background:rgba(24,119,242,0.15);border:1px solid rgba(24,119,242,0.4);border-radius:10px;color:#4a9ff5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;';
+  bf.textContent='&#55357;&#56421; Facebook গ্রুপে শেয়ার';
+  bf.onclick=function(){window.open(FB_GROUP,'_blank');};
+  var cl=document.createElement('button');
+  cl.style.cssText='width:100%;margin-top:4px;padding:10px;background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;font-family:inherit;';
+  cl.textContent='বাতিল';cl.onclick=function(){m.remove();};
+  row.appendChild(bc);row.appendChild(bw);
+  bx.appendChild(h);bx.appendChild(ta);bx.appendChild(row);bx.appendChild(bf);bx.appendChild(cl);
+  m.appendChild(bx);document.body.appendChild(m);
+  m.addEventListener('click',function(ev){if(ev.target===m)m.remove();});
+}
 function saveJournal() {
   const text = document.getElementById('journal-text').value.trim();
   if (!text) return;
@@ -4345,14 +4325,11 @@ function renderJournalHistory() {
     container.innerHTML = '<div class="empty-state"><div class="empty-icon">📝</div>এখনো কোনো লেখা নেই</div>';
     return;
   }
-  container.innerHTML = state.journals.slice(0, 5).map((j, i) => `
+  container.innerHTML = state.journals.slice(0, 5).map((j, idx) => `
     <div class="journal-entry">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
         <div class="journal-date">${j.date}</div>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="journal-mood">${j.mood}</div>
-          <button onclick="shareJournalEntry(${i})" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:3px 10px;color:var(--accent);font-size:11px;cursor:pointer;font-family:inherit;">📤 শেয়ার</button>
-        </div>
+        <div class="journal-mood">${j.mood}</div><button onclick="shareJournalEntry(${idx})" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:3px 10px;color:var(--accent);font-size:11px;cursor:pointer;font-family:inherit;">শেয়ার</button>
       </div>
       <div class="journal-text">${j.text}</div>
     </div>
@@ -5759,27 +5736,20 @@ const DAILY_QUOTES = [
 ];
 
 function updateDailyQuote() {
-  const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
-  const quote = DAILY_QUOTES[dayOfYear % DAILY_QUOTES.length];
-  function applyQuote() {
-    const el = document.getElementById('daily-quote-text');
-    const src = document.getElementById('daily-quote-source');
-    const badge = document.getElementById('quote-day-badge');
-    const el2 = document.getElementById('onboard-quote-text');
-    const src2 = document.getElementById('onboard-quote-source');
-    if (el) el.textContent = '\u201c' + quote.text + '\u201d';
-    if (src) src.textContent = '\u2014 ' + quote.source;
-    if (el2) el2.textContent = '\u201c' + quote.text + '\u201d';
-    if (src2) src2.textContent = '\u2014 ' + quote.source;
-    if (badge) {
-      const days = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
-      badge.textContent = days[new Date().getDay()];
-    }
-    return !!el2 || !!el;
+  if (typeof DAILY_QUOTES === 'undefined') { setTimeout(updateDailyQuote, 200); return; }
+  var dy = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 86400000);
+  var q = DAILY_QUOTES[dy % DAILY_QUOTES.length];
+  var wk = ['রবিবার','সোমবার','মঙ্গলবার','বুধবার','বৃহস্পতিবার','শুক্রবার','শনিবার'];
+  function ap() {
+    ['daily-quote-text','onboard-quote-text'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.textContent='“'+q.text+'”';
+    });
+    ['daily-quote-source','onboard-quote-source'].forEach(function(id){
+      var el=document.getElementById(id); if(el) el.textContent='— '+q.source;
+    });
+    var b=document.getElementById('quote-day-badge'); if(b) b.textContent=wk[new Date().getDay()];
   }
-  if (!applyQuote()) {
-    setTimeout(function(){ if(!applyQuote()) setTimeout(applyQuote, 800); }, 200);
-  }
+  ap(); setTimeout(ap, 500);
 }
 
 // ========================
@@ -5787,17 +5757,13 @@ function updateDailyQuote() {
 // ========================
 let _ac;
 function getAC() {
-  if (!_ac) {
-    _ac = new (window.AudioContext || window.webkitAudioContext)();
-  }
+  if (!_ac) _ac = new (window.AudioContext || window.webkitAudioContext)();
   if (_ac.state === 'suspended') _ac.resume();
   return _ac;
 }
-// Unlock audio on very first user touch (iOS requirement)
-document.addEventListener('touchstart', function _unlock() {
-  try { getAC(); } catch(e) {}
-  document.removeEventListener('touchstart', _unlock);
-}, { once: true, passive: true });
+document.addEventListener('touchstart', function _ul(){
+  try{getAC();}catch(e){}
+},{once:true,passive:true});
 function playWarmTap() {
   try {
     const ac = getAC();
