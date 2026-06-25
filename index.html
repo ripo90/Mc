@@ -49,9 +49,8 @@
   /* APP WRAPPER */
   #app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 
-  /* SCREENS — transition defined with nav styles below */
+  /* SCREENS */
   .screen { display:none; flex:1; overflow-y:auto; padding-bottom:80px; }
-  .screen.active { display:block; }
 
   /* SCROLLBAR */
   .screen::-webkit-scrollbar { width:2px; }
@@ -242,12 +241,25 @@
 
   /* CARDS */
   .card {
-    background:var(--card);
-    border:1px solid rgba(255,255,255,0.05);
+    background:linear-gradient(160deg,#0f1d2e,#0a1520);
+    border:1px solid rgba(99,102,241,0.12);
     border-radius:var(--radius);
     padding:20px;
     margin:0 14px 12px;
-    box-shadow: 0 2px 16px rgba(0,0,0,0.25);
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    position:relative; overflow:hidden;
+  }
+  .card::before {
+    content:'';
+    position:absolute;
+    top:0; left:10%; right:10%; height:1px;
+    background:linear-gradient(90deg,transparent,rgba(99,102,241,0.4),transparent);
+    pointer-events:none;
+  }
+  .card:active {
+    transform: scale(0.985);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
   }
   .card-title {
     font-size:13px; font-weight:600;
@@ -362,27 +374,6 @@
     to { transform:scale(4); opacity:0; }
   }
 
-  /* Card press effect */
-  .card {
-    background:linear-gradient(160deg,#0f1d2e,#0a1520);
-    border:1px solid rgba(99,102,241,0.12);
-    border-radius:var(--radius);
-    padding:20px;
-    margin:0 14px 12px;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
-    transition: transform 0.15s ease, box-shadow 0.15s ease;
-    position:relative; overflow:hidden;
-  }
-  .card::before {
-    content:'';
-    position:absolute;
-    top:0; left:10%; right:10%; height:1px;
-    background:linear-gradient(90deg,transparent,rgba(99,102,241,0.4),transparent);
-  }
-  .card:active {
-    transform: scale(0.985);
-    box-shadow: 0 1px 6px rgba(0,0,0,0.2);
-  }
   .tabs { display:flex; gap:8px; padding:0 14px 16px; overflow-x:auto; }
   .tabs::-webkit-scrollbar { display:none; }
   .tab {
@@ -1248,7 +1239,7 @@
         </div>
         <!-- Quote text -->
         <div style="position:relative;padding:14px 16px;background:rgba(255,255,255,0.03);border-radius:12px;border-left:3px solid rgba(99,102,241,0.5);margin-bottom:12px;">
-          <div style="font-size:15px;line-height:1.8;color:var(--text);font-style:italic;font-weight:500;" id="daily-quote-text">লোড হচ্ছে...</div>
+          <div style="font-size:15px;line-height:1.8;color:var(--text);font-style:italic;font-weight:500;" id="daily-quote-text"></div>
         </div>
         <!-- Source -->
         <div style="display:flex;align-items:center;gap:6px;">
@@ -4265,14 +4256,10 @@ function shareJournalEntry(i) {
 function doShare(txt) {
   var FB_GROUP = 'https://www.facebook.com/share/g/19rxS9ubJa/';
   if(navigator.share){
-    navigator.share({text:txt+'
-
-'+FB_GROUP}).catch(function(){});
+    navigator.share({text:txt+'\n\n'+FB_GROUP}).catch(function(){});
     return;
   }
-  window._st = txt + '
-
-' + FB_GROUP;
+  window._st = txt + '\n\n' + FB_GROUP;
   var e=document.getElementById('_sm');if(e)e.remove();
   var m=document.createElement('div');m.id='_sm';
   m.style.cssText='position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.75);display:flex;align-items:flex-end;justify-content:center;padding:16px;';
@@ -5689,7 +5676,7 @@ function fbChangePage(dir) {}
 // ========================
 // DAILY QUOTE
 // ========================
-const DAILY_QUOTES = [
+var DAILY_QUOTES = [
   // চোখের পর্দা ও দৃষ্টি সংযত রাখা
   { text: "মুমিন পুরুষদের বলুন, তারা যেন তাদের দৃষ্টি সংযত রাখে এবং তাদের লজ্জাস্থান হেফাজত করে। এটাই তাদের জন্য পবিত্রতর। নিশ্চয়ই আল্লাহ তাদের কাজকর্ম সম্পর্কে সম্যক অবহিত।", source: "সূরা আন-নূর ২৪:৩০" },
   { text: "মুমিন নারীদের বলুন, তারা যেন তাদের দৃষ্টি সংযত রাখে, তাদের লজ্জাস্থান হেফাজত করে।", source: "সূরা আন-নূর ২৪:৩১" },
@@ -5802,7 +5789,6 @@ function attachRipple(el) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  updateDailyQuote();
   // Initial attach
   document.querySelectorAll('.btn').forEach(el => {
     el.dataset.ripple = '1';
