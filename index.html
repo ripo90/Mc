@@ -2436,7 +2436,7 @@
 
     <!-- Journey feed -->
     <div style="padding:0 14px 6px; display:flex; align-items:center; justify-content:space-between;">
-      <div style="font-size:14px; font-weight:700;">📖 সবার গল্প</div>
+      <div style="font-size:14px; font-weight:700;">🌱 ফিরে আসার জার্নি</div>
       <div id="journey-count" style="font-size:11px; color:var(--text3); font-family:var(--font-ui);"></div>
     </div>
     <div id="journey-feed"></div>
@@ -4285,8 +4285,27 @@ function shareCurrentJournal() {
   doShare((state.moodToday||'')+' জার্নাল — '+d+'\n\n“'+t+'”\n\n#মাস্টারকন্ট্রোল');
 }
 function shareJournalEntry(i) {
-  var j=state.journals[i];if(!j)return;
-  doShare(j.mood+' জার্নাল — '+j.date+'\n\n“'+j.text+'”\n\n#মাস্টারকন্ট্রোল');
+  var j = state.journals[i]; if (!j) return;
+  var FB = 'https://www.facebook.com/share/g/19rxS9ubJa/';
+  var txt = j.mood + ' আমার জার্নাল — ' + j.date + '\n\n' + j.text + '\n\n#মাস্টারকন্ট্রোল\n' + FB;
+  var ov = document.getElementById('_sm2'); if(ov) ov.remove();
+  ov = document.createElement('div'); ov.id='_sm2';
+  ov.style.cssText='position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.85);display:flex;align-items:flex-end;justify-content:center;padding:12px;';
+  var bx = document.createElement('div');
+  bx.style.cssText='background:#131a2e;border:1px solid rgba(255,255,255,0.12);border-radius:20px;padding:20px;width:100%;max-width:420px;';
+  bx.innerHTML='<p style="font-size:15px;font-weight:800;margin:0 0 14px;text-align:center;color:#fff;">📤 শেয়ার করুন</p>'+
+    '<textarea readonly id="_stxt" style="width:100%;box-sizing:border-box;background:#0d1321;border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:10px;color:#ccc;font-size:12px;font-family:inherit;resize:none;height:80px;margin-bottom:12px;"></textarea>'+
+    '<button id="_sc" style="width:100%;padding:13px;background:#6366f1;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;">📋 কপি করুন</button>'+
+    '<button id="_sw" style="width:100%;padding:13px;background:#075e54;border:none;border-radius:10px;color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;">💬 WhatsApp</button>'+
+    '<button id="_sf" style="width:100%;padding:13px;background:rgba(24,119,242,0.2);border:1px solid rgba(24,119,242,0.5);border-radius:10px;color:#4a9ff5;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;margin-bottom:8px;">👥 Facebook গ্রুপ</button>'+
+    '<button id="_sx" style="width:100%;padding:10px;background:none;border:none;color:#888;font-size:12px;cursor:pointer;font-family:inherit;">বাতিল</button>';
+  ov.appendChild(bx); document.body.appendChild(ov);
+  document.getElementById('_stxt').value = txt;
+  document.getElementById('_sc').onclick=function(){navigator.clipboard?navigator.clipboard.writeText(txt).then(function(){showToast('✅ কপি হয়েছে!');}):showToast('কপি সাপোর্ট নেই');};
+  document.getElementById('_sw').onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent(txt),'_blank');};
+  document.getElementById('_sf').onclick=function(){window.open(FB,'_blank');};
+  document.getElementById('_sx').onclick=function(){ov.remove();};
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
 }
 function doShare(txt) {
   var FB_GROUP = 'https://www.facebook.com/share/g/19rxS9ubJa/';
