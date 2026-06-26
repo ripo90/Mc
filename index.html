@@ -1199,6 +1199,9 @@
       </div>
     </div>
 
+    <!-- Streak motivational message -->
+    <div id="home-streak-msg" style="margin:0 14px 4px;font-size:13px;color:var(--accent);text-align:center;font-weight:600;min-height:20px;"></div>
+
     <!-- Quick Actions -->
     <div class="card">
       <div class="card-title">⚡ দ্রুত শুরু করুন</div>
@@ -3295,10 +3298,12 @@ function renderJourneyFeed() {
 }
 
 function deleteJourneyPost(id) {
+  if (!confirm('এই পোস্টটি মুছে ফেলবেন?')) return;
   let posts = JSON.parse(localStorage.getItem('mc_journey_posts') || '[]');
   posts = posts.filter(p => p.id !== id);
   localStorage.setItem('mc_journey_posts', JSON.stringify(posts));
   renderJourneyFeed();
+  showToast('🗑️ পোস্ট মুছে ফেলা হয়েছে');
 }
 
 function shareToFacebook() {
@@ -3585,6 +3590,15 @@ function updateHome() {
 
   // Daily quote — handled by updateDailyQuote()
 
+  // Streak motivational message
+  var streakEl = document.getElementById('home-streak-msg');
+  if (streakEl) {
+    if (state.streak === 0) streakEl.textContent = '🌟 আজ থেকেই শুরু করুন — প্রথম দিনটাই সবচেয়ে গুরুত্বপূর্ণ!';
+    else if (state.streak < 7) streakEl.textContent = '💪 চালিয়ে যান! ' + state.streak + ' দিন ধরে রেখেছেন।';
+    else if (state.streak < 30) streakEl.textContent = '🔥 দারুণ! ' + state.streak + ' দিনের ধারা — থামবেন না!';
+    else streakEl.textContent = '🏆 অসাধারণ! ' + state.streak + ' দিন! আপনি একজন চ্যাম্পিয়ন!';
+  }
+
   // Habits UI
   Object.keys(state.todayHabits).forEach(h => {
     const el = document.getElementById('habit-' + h);
@@ -3599,8 +3613,18 @@ function toggleHabit(row, key) {
   if (!isAppUnlocked()) { requireUnlock('হ্যাবিট ট্র্যাকার'); return; }
   state.todayHabits[key] = !state.todayHabits[key];
   const check = document.getElementById('habit-' + key);
-  if (state.todayHabits[key]) { check.classList.add('done'); check.textContent = '✓'; }
-  else { check.classList.remove('done'); check.textContent = ''; }
+  if (state.todayHabits[key]) {
+    check.classList.add('done'); check.textContent = '✓';
+    // Bounce animation
+    check.style.transform = 'scale(1.4)';
+    setTimeout(function() { check.style.transform = 'scale(1)'; check.style.transition = 'transform 0.2s ease'; }, 150);
+    playWarmTap();
+    // Check if all habits done
+    const allDone = Object.values(state.todayHabits).every(Boolean);
+    if (allDone) setTimeout(function() { showToast('🎉 সব অভ্যাস সম্পন্ন! আপনি অসাধারণ!'); }, 300);
+  } else {
+    check.classList.remove('done'); check.textContent = '';
+  }
   saveState();
 }
 
@@ -4399,8 +4423,20 @@ function renderJournalHistory() {
         <div class="journal-mood">${j.mood}</div><button onclick="shareJournalEntry(${idx})" style="background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:3px 10px;color:var(--accent);font-size:11px;cursor:pointer;font-family:inherit;">শেয়ার</button>
       </div>
       <div class="journal-text">${j.text}</div>
+      <div style="display:flex;gap:8px;margin-top:8px;">
+        <button onclick="shareJournalEntry(${idx})" style="flex:1;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);border-radius:8px;padding:7px;color:var(--accent);font-size:12px;cursor:pointer;font-family:inherit;">📤 শেয়ার করুন</button>
+        <button onclick="deleteJournalEntry(${idx})" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);border-radius:8px;padding:7px 12px;color:#ef4444;font-size:12px;cursor:pointer;font-family:inherit;">🗑️</button>
+      </div>
     </div>
   `).join('');
+}
+
+function deleteJournalEntry(idx) {
+  if (!confirm('এই জার্নাল এন্ট্রি মুছে ফেলবেন?')) return;
+  state.journals.splice(idx, 1);
+  saveState();
+  renderJournalHistory();
+  showToast('🗑️ জার্নাল মুছে ফেলা হয়েছে');
 }
 
 function buildCalendar() {
@@ -5490,6 +5526,7 @@ function saveSettings() {
   ];
   saveState();
   scheduleNotifications();
+  showToast('✅ সেটিংস সংরক্ষিত হয়েছে');
 }
 
 function saveProfileSettings() {
