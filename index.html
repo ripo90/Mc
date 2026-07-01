@@ -82,6 +82,43 @@
   /* APP WRAPPER */
   #app { display:flex; flex-direction:column; height:100vh; height:100dvh; }
 
+  /* BOTTOM NAV BAR */
+  #bottom-nav {
+    position: fixed;
+    left: 0; right: 0; bottom: 0;
+    z-index: 500;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding: 6px 4px calc(6px + env(safe-area-inset-bottom));
+    background: rgba(13,17,23,0.88);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(129,140,248,0.18);
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.35);
+  }
+  .bnav-item {
+    flex: 1;
+    display: flex; flex-direction: column; align-items: center; gap: 2px;
+    background: none; border: none; cursor: pointer;
+    padding: 6px 2px;
+    font-family: var(--font-ui);
+    color: var(--text3);
+    transition: color 0.18s ease, transform 0.18s ease;
+  }
+  .bnav-item:active { transform: scale(0.92); }
+  .bnav-icon { font-size: 19px; line-height: 1; filter: grayscale(1) opacity(0.7); transition: filter 0.18s ease; }
+  .bnav-label { font-size: 10px; font-weight: 600; }
+  .bnav-item.active { color: var(--accent); }
+  .bnav-item.active .bnav-icon { filter: none; }
+  .bnav-item.active .bnav-label {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  @media (min-width: 640px) { #bottom-nav { display: none; } }
+
   /* SCREENS — transition defined with nav styles below */
   .screen { display:none; flex:1; overflow-y:auto; padding-bottom:80px; }
   .screen.active { display:block; }
@@ -1245,8 +1282,8 @@
     box-shadow: 0 4px 20px rgba(99,102,241,0.35);
   }
 
-  /* 11. Kegel session button — energy color */
-  [onclick*="startKegel"], [onclick*="kegel"] {
+  /* 11. Kegel session button — energy color (scoped to actual primary buttons only) */
+  .btn-primary[onclick*="startKegel"] {
     background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #06b6d4 100%);
     box-shadow: 0 6px 24px rgba(99,102,241,0.4);
   }
@@ -1455,27 +1492,49 @@
   }
   .card::before { display: none; }
 
+  /* PREMIUM HERO CARD — welcome card on home screen */
   .gradient-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    box-shadow: 0 2px 12px rgba(0,0,0,0.25);
+    background: linear-gradient(135deg, #1a1f3d 0%, #161b22 60%);
+    border: 1px solid rgba(129,140,248,0.35);
+    box-shadow: 0 8px 28px rgba(99,102,241,0.22), 0 0 0 1px rgba(129,140,248,0.06);
   }
-  .gradient-card::before,
-  .gradient-card::after { display: none; }
+  .gradient-card::before {
+    display: block;
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(129,140,248,0.16) 0%, rgba(167,139,250,0.08) 45%, transparent 80%);
+  }
+  .gradient-card::after {
+    display: block;
+    content: '';
+    position: absolute;
+    top: -50px; right: -50px;
+    width: 180px; height: 180px;
+    background: radial-gradient(circle, rgba(129,140,248,0.18), transparent 70%);
+    pointer-events: none;
+  }
 
-  /* Stat boxes — clean top border color */
+  /* Stat boxes — clean top border color + subtle premium glow */
   .stat-box {
     background: var(--surface);
     border: 1px solid var(--border);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
   }
-  .stat-box::before { display: none; }
+  .stat-box::before {
+    display: block;
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 36px;
+    background: linear-gradient(180deg, rgba(129,140,248,0.10), transparent);
+    pointer-events: none;
+  }
 
   /* === BUTTONS — Fix text visibility, clean look === */
   /* Only btn-primary and btn-outline, NOT generic .btn */
   .btn-primary {
-    background: #6366f1;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
     color: #ffffff;
-    box-shadow: 0 3px 14px rgba(99,102,241,0.35);
+    box-shadow: 0 4px 18px rgba(99,102,241,0.4);
   }
   .btn-primary:hover {
     background: #5558e8;
@@ -1495,12 +1554,7 @@
     color: #ffffff;
   }
 
-  /* Kegel + journal quick action buttons — fix text */
-  [onclick*="startKegel"] {
-    background: #6366f1;
-    color: #ffffff;
-    box-shadow: 0 4px 16px rgba(99,102,241,0.3);
-  }
+  /* Journal quick action buttons — fix text */
   [onclick*="Journal"], [onclick*="journal"] {
     color: #ffffff;
   }
@@ -2033,6 +2087,21 @@
       </div>
     </div>
 
+    <!-- AI Coach -->
+    <div class="card" id="coach-card" style="border:1px solid rgba(139,92,246,0.3); background:linear-gradient(135deg, rgba(59,130,246,0.06), rgba(139,92,246,0.06)), var(--card);">
+      <div style="display:flex; gap:12px; align-items:flex-start;">
+        <div style="width:38px;height:38px;border-radius:12px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);display:flex;align-items:center;justify-content:center;font-size:19px;flex-shrink:0;box-shadow:0 4px 14px rgba(99,102,241,0.35);" id="coach-avatar">🧠</div>
+        <div style="flex:1;min-width:0;">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:3px;">
+            <span style="font-size:13px;font-weight:700;color:var(--text1);">তোমার কোচ</span>
+            <span style="font-size:9px;font-weight:700;padding:2px 6px;border-radius:99px;background:rgba(139,92,246,0.15);color:#a78bfa;letter-spacing:0.04em;">AI</span>
+          </div>
+          <div id="coach-message" style="font-size:14px;line-height:1.55;color:var(--text2);">তোমার আজকের অবস্থা জানাও, আমি সাহায্য করবো।</div>
+          <button id="coach-action-btn" onclick="" style="display:none;margin-top:10px;padding:9px 16px;border:none;border-radius:10px;background:linear-gradient(135deg,#3B82F6,#8B5CF6);color:#fff;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;"></button>
+        </div>
+      </div>
+    </div>
+
     <div class="stat-grid">
       <div class="stat-box" style="--stat-color:var(--accent);">
         <div class="stat-val" style="color:var(--accent);" id="home-total-sessions">0</div>
@@ -2064,29 +2133,46 @@
       </div>
     </div>
 
-    <!-- Today Habits -->
-    <div class="card">
-      <div class="card-title">✅ আজকের অভ্যাস</div>
-      <div id="home-habits">
+    <!-- Today's Mission -->
+    <div class="card" id="mission-card">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+        <div class="card-title" style="margin-bottom:0;">🎯 আজকের মিশন</div>
+        <div id="mission-pct-text" style="font-size:13px;font-weight:700;color:var(--accent);">0%</div>
+      </div>
+      <div style="height:8px;background:var(--surface2);border-radius:99px;overflow:hidden;margin:8px 0 4px;">
+        <div id="mission-progress-bar" style="height:100%;width:0%;border-radius:99px;background:linear-gradient(90deg,#3B82F6,#8B5CF6);transition:width 0.4s ease;"></div>
+      </div>
+      <div id="mission-summary-text" style="font-size:12px;color:var(--text3);margin-bottom:10px;">০/৬ সম্পন্ন</div>
+
+      <div id="mission-pending-wrap" style="margin-bottom:6px;">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);letter-spacing:0.05em;text-transform:uppercase;margin-bottom:6px;">⏳ বাকি কাজ</div>
+        <div id="mission-pending-list" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+      </div>
+
+      <div id="home-habits" style="margin-top:6px;">
         <div class="habit-item" onclick="toggleHabit(this,'namaz')">
-          <div class="habit-check" id="habit-namaz">✓</div>
+          <div class="habit-check" id="habit-namaz"></div>
           <div style="flex:1; font-size:14px; font-weight:500;">🕌 নামাজ</div>
         </div>
         <div class="habit-item" onclick="toggleHabit(this,'kegel')">
-          <div class="habit-check" id="habit-kegel">✓</div>
-          <div style="flex:1; font-size:14px; font-weight:500;">💪 কেগেল</div>
+          <div class="habit-check" id="habit-kegel"></div>
+          <div style="flex:1; font-size:14px; font-weight:500;">💪 কেগেল সেশন</div>
         </div>
         <div class="habit-item" onclick="toggleHabit(this,'walk')">
-          <div class="habit-check" id="habit-walk">✓</div>
+          <div class="habit-check" id="habit-walk"></div>
           <div style="flex:1; font-size:14px; font-weight:500;">🚶 হাঁটা</div>
         </div>
         <div class="habit-item" onclick="toggleHabit(this,'water')">
-          <div class="habit-check" id="habit-water">✓</div>
+          <div class="habit-check" id="habit-water"></div>
           <div style="flex:1; font-size:14px; font-weight:500;">💧 পানি পান</div>
         </div>
         <div class="habit-item" onclick="toggleHabit(this,'noscreen')">
-          <div class="habit-check" id="habit-noscreen">✓</div>
+          <div class="habit-check" id="habit-noscreen"></div>
           <div style="flex:1; font-size:14px; font-weight:500;">📵 স্ক্রিন কম</div>
+        </div>
+        <div class="habit-item" onclick="showScreen('recovery')" style="cursor:pointer;">
+          <div class="habit-check" id="habit-journal"></div>
+          <div style="flex:1; font-size:14px; font-weight:500;">📖 জার্নাল লেখা</div>
         </div>
       </div>
     </div>
@@ -2712,6 +2798,51 @@
   <div id="screen-progress" class="screen">
     <div class="section-header">📊 অগ্রগতি</div>
     <div class="section-sub">আপনার যাত্রার পরিসংখ্যান</div>
+
+    <!-- Composite Score Cards -->
+    <div style="padding:0 14px 12px;display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="card" style="margin:0;padding:14px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span style="font-size:16px;">❤️</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text2);">রিকভারি স্কোর</span>
+        </div>
+        <div style="font-size:26px;font-weight:800;color:var(--accent);margin-bottom:6px;" id="score-recovery">0</div>
+        <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+          <div id="score-recovery-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#3B82F6,#8B5CF6);border-radius:99px;transition:width .4s ease;"></div>
+        </div>
+      </div>
+      <div class="card" style="margin:0;padding:14px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span style="font-size:16px;">💪</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text2);">পেলভিক স্ট্রেংথ</span>
+        </div>
+        <div style="font-size:26px;font-weight:800;color:var(--green);margin-bottom:2px;" id="score-pelvic">0%</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:6px;" id="score-pelvic-label">শিক্ষার্থী</div>
+        <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+          <div id="score-pelvic-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#10B981,#34d399);border-radius:99px;transition:width .4s ease;"></div>
+        </div>
+      </div>
+      <div class="card" style="margin:0;padding:14px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span style="font-size:16px;">🧭</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text2);">ডিসিপ্লিন লেভেল</span>
+        </div>
+        <div style="font-size:26px;font-weight:800;color:var(--gold);margin-bottom:6px;" id="score-discipline">0%</div>
+        <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+          <div id="score-discipline-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#F59E0B,#fbbf24);border-radius:99px;transition:width .4s ease;"></div>
+        </div>
+      </div>
+      <div class="card" style="margin:0;padding:14px;">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px;">
+          <span style="font-size:16px;">🛡️</span>
+          <span style="font-size:12px;font-weight:700;color:var(--text2);">পর্ন-ফ্রি স্কোর</span>
+        </div>
+        <div style="font-size:26px;font-weight:800;color:var(--accent3);margin-bottom:6px;" id="score-pornfree">0%</div>
+        <div style="height:6px;background:var(--surface2);border-radius:99px;overflow:hidden;">
+          <div id="score-pornfree-bar" style="height:100%;width:0%;background:linear-gradient(90deg,#38bdf8,#22d3ee);border-radius:99px;transition:width .4s ease;"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- Overall Stats -->
     <div class="stat-grid">
@@ -3422,6 +3553,29 @@
   </div>
 
   <!-- BOTTOM NAV -->
+  <div id="bottom-nav">
+    <button class="bnav-item active" data-screen="home">
+      <span class="bnav-icon">🏠</span>
+      <span class="bnav-label">হোম</span>
+    </button>
+    <button class="bnav-item" data-screen="kegel">
+      <span class="bnav-icon">💪</span>
+      <span class="bnav-label">কেগেল</span>
+    </button>
+    <button class="bnav-item" data-screen="progress">
+      <span class="bnav-icon">📊</span>
+      <span class="bnav-label">অগ্রগতি</span>
+    </button>
+    <button class="bnav-item" data-screen="edu">
+      <span class="bnav-icon">📚</span>
+      <span class="bnav-label">শিক্ষা</span>
+    </button>
+    <button class="bnav-item" data-screen="settings">
+      <span class="bnav-icon">⚙️</span>
+      <span class="bnav-label">সেটিংস</span>
+    </button>
+  </div>
+
   <!-- SIDEBAR OVERLAY -->
   <div id="sidebar-overlay" onclick="closeSidebar()"></div>
 
@@ -4398,6 +4552,12 @@ function navTo(id) {
   if (window.innerWidth < 640) closeSidebar();
 }
 
+document.querySelectorAll('#bottom-nav .bnav-item').forEach(function(btn) {
+  btn.addEventListener('click', function() {
+    navTo(btn.getAttribute('data-screen'));
+  });
+});
+
 function updateSidebarUser() {
   const name = state.user.name || 'বন্ধু';
   const avatarEl = document.getElementById('sidebar-avatar');
@@ -4427,10 +4587,13 @@ function showScreen(id) {
   }
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.bnav-item').forEach(n => n.classList.remove('active'));
   const screenEl = document.getElementById('screen-' + id);
   if (screenEl) { screenEl.classList.add('active'); screenEl.scrollTop = 0; }
   const navEl = document.getElementById('nav-' + id);
   if (navEl) navEl.classList.add('active');
+  const bnavEl = document.querySelector('.bnav-item[data-screen="' + id + '"]');
+  if (bnavEl) bnavEl.classList.add('active');
   document.getElementById('topbar-title').textContent = screenTitles[id] || '';
   updateSidebarUser();
   if (id === 'home') updateHome();
@@ -4529,14 +4692,148 @@ function updateHome() {
     else streakEl.textContent = '🏆 অসাধারণ! ' + state.streak + ' দিন! আপনি একজন চ্যাম্পিয়ন!';
   }
 
-  // Habits UI
-  Object.keys(state.todayHabits).forEach(h => {
+  // Habits UI — always sync all known habit keys (fixes stale ✓ glyphs on fresh/new-day state)
+  ['namaz','kegel','walk','water','noscreen'].forEach(h => {
     const el = document.getElementById('habit-' + h);
     if (el) {
       if (state.todayHabits[h]) { el.classList.add('done'); el.textContent = '✓'; }
       else { el.classList.remove('done'); el.textContent = ''; }
     }
   });
+
+  // Today's Mission — progress + pending list (habits + auto-derived journal)
+  var missionLabels = { namaz:'🕌 নামাজ', kegel:'💪 কেগেল সেশন', walk:'🚶 হাঁটা', water:'💧 পানি পান', noscreen:'📵 স্ক্রিন কম' };
+  var todayStr = new Date().toDateString();
+  var journalDoneToday = !!(state.journals && state.journals.some(function(j){ return j.dateRaw === todayStr; }));
+  var journalEl = document.getElementById('habit-journal');
+  if (journalEl) {
+    if (journalDoneToday) { journalEl.classList.add('done'); journalEl.textContent = '✓'; }
+    else { journalEl.classList.remove('done'); journalEl.textContent = ''; }
+  }
+
+  var missionKeys = Object.keys(missionLabels);
+  var doneCount = 0, totalCount = missionKeys.length + 1;
+  var pending = [];
+  missionKeys.forEach(function(k) {
+    if (state.todayHabits[k]) doneCount++;
+    else pending.push(missionLabels[k]);
+  });
+  if (journalDoneToday) doneCount++; else pending.push('📖 জার্নাল লেখা');
+
+  var missionPct = Math.round((doneCount / totalCount) * 100);
+  var pctEl = document.getElementById('mission-pct-text');
+  var barEl = document.getElementById('mission-progress-bar');
+  var summaryEl = document.getElementById('mission-summary-text');
+  var pendingWrap = document.getElementById('mission-pending-wrap');
+  var pendingList = document.getElementById('mission-pending-list');
+  if (pctEl) pctEl.textContent = missionPct + '%';
+  if (barEl) barEl.style.width = missionPct + '%';
+  if (summaryEl) summaryEl.textContent = doneCount + '/' + totalCount + ' সম্পন্ন';
+  if (pendingList) {
+    pendingList.innerHTML = pending.map(function(label) {
+      return '<span style="font-size:12px;padding:5px 10px;border-radius:99px;background:rgba(96,165,250,0.08);border:1px solid rgba(96,165,250,0.25);color:var(--text2);">' + label + '</span>';
+    }).join('');
+  }
+  if (pendingWrap) pendingWrap.style.display = pending.length ? 'block' : 'none';
+
+  renderCoachMessage(doneCount, totalCount, missionPct);
+}
+
+// =====================
+// AI COACH (rule-based)
+// =====================
+function renderCoachMessage(doneCount, totalCount, missionPct) {
+  const msgEl = document.getElementById('coach-message');
+  const btnEl = document.getElementById('coach-action-btn');
+  const avatarEl = document.getElementById('coach-avatar');
+  if (!msgEl || !btnEl) return;
+
+  var hour = new Date().getHours();
+  var rule = null; // { icon, text, actionLabel, action }
+
+  // Priority 1 — explicit relapse/failure logged today
+  if (state.controlToday === 'failed') {
+    rule = {
+      icon: '💙',
+      text: 'আজকে হেরে গেছ মনে হচ্ছে? এটা দিয়ে তোমার পুরো যাত্রা মাপা হয় না। নিজেকে দোষারোপ না করে এখন ২ মিনিটের একটা রিকভারি ব্রিদিং এক্সারসাইজ করে নাও।',
+      actionLabel: '🌬️ রিকভারি শুরু করো',
+      action: 'openEmergency()'
+    };
+  }
+  // Priority 2 — tempted / high stress today
+  else if (state.controlToday === 'tempted' || state.stressToday >= 3) {
+    rule = {
+      icon: '🆘',
+      text: 'আজকে urge একটু বেশি লাগছে, তাই না? এটা স্বাভাবিক — শরীর পরীক্ষা নিচ্ছে। চলো একসাথে ২ মিনিটের একটা শ্বাস-ব্যায়াম করি, ঢেউয়ের মতো এটাও কেটে যাবে।',
+      actionLabel: '🆘 এখনই সাহায্য নাও',
+      action: 'openEmergency()'
+    };
+  }
+  // Priority 3 — sad mood logged today
+  else if (state.moodToday === '😔') {
+    rule = {
+      icon: '🤍',
+      text: 'আজ মন খারাপ লাগছে, বুঝতে পারছি। সব কথা মনে না রেখে একটু লিখে ফেলো — জার্নালে মনের ভার নামালে হালকা লাগবে।',
+      actionLabel: '📖 জার্নালে লিখো',
+      action: "showScreen('recovery')"
+    };
+  }
+  // Priority 4 — mission fully complete today
+  else if (totalCount > 0 && doneCount === totalCount) {
+    rule = {
+      icon: '🎉',
+      text: 'আজকের পুরো মিশন শেষ করেছ! এটাই আসল ধারাবাহিকতা — একদিন একদিন করেই বড় পরিবর্তন হয়। কাল আবার দেখা হবে।',
+      actionLabel: '',
+      action: ''
+    };
+  }
+  // Priority 5 — streak reset to zero, fresh start
+  else if (state.streak === 0) {
+    rule = {
+      icon: '🌱',
+      text: 'আজ থেকে নতুন একটা শুরু। প্রথম দিনটাই সবচেয়ে গুরুত্বপূর্ণ — চলো একটা ছোট কেগেল সেশন দিয়ে শুরু করি।',
+      actionLabel: '💪 সেশন শুরু করো',
+      action: "showScreen('kegel'); startKegel()"
+    };
+  }
+  // Priority 6 — mood not logged yet today
+  else if (!state.moodToday) {
+    rule = {
+      icon: '🙂',
+      text: 'আজকে কেমন লাগছে এখনো জানাওনি। মুড লগ করো — তার উপর ভিত্তি করে আমি তোমার জন্য পরামর্শ ঠিক করবো।',
+      actionLabel: '🙂 মুড লগ করো',
+      action: "showScreen('health')"
+    };
+  }
+  // Priority 7 — late night nudge if tasks pending
+  else if (hour >= 21 && doneCount < totalCount) {
+    rule = {
+      icon: '🌙',
+      text: 'রাত হয়ে যাচ্ছে। ঘুমানোর আগে আজকের বাকি কাজগুলো একবার দেখে নাও — ছোট একটা কাজ শেষ করলেও ধারা ঠিক থাকবে।',
+      actionLabel: '✅ মিশন দেখো',
+      action: "document.getElementById('mission-card').scrollIntoView({behavior:'smooth'})"
+    };
+  }
+  // Priority 8 — fallback by streak length
+  else {
+    if (state.streak < 7) {
+      rule = { icon: '💪', text: 'চালিয়ে যাও! প্রতিটা দিন তোমাকে আগের চেয়ে শক্তিশালী করছে। ' + state.streak + ' দিন হয়ে গেছে।', actionLabel: '', action: '' };
+    } else if (state.streak < 30) {
+      rule = { icon: '🔥', text: 'দারুণ ধারা চলছে — ' + state.streak + ' দিন! এই মোমেন্টাম ধরে রাখো, হাল ছেড়ো না।', actionLabel: '', action: '' };
+    } else {
+      rule = { icon: '🏆', text: 'তুমি ' + state.streak + ' দিন ধরে যা করেছ, সেটা সহজ কাজ না। এখন তুমি নিজেই একটা উদাহরণ।', actionLabel: '', action: '' };
+    }
+  }
+
+  msgEl.textContent = rule.text;
+  if (avatarEl) avatarEl.textContent = rule.icon;
+  if (rule.actionLabel) {
+    btnEl.style.display = 'inline-block';
+    btnEl.textContent = rule.actionLabel;
+    btnEl.setAttribute('onclick', rule.action);
+  } else {
+    btnEl.style.display = 'none';
+  }
 }
 
 function toggleHabit(row, key) {
@@ -4556,6 +4853,7 @@ function toggleHabit(row, key) {
     check.classList.remove('done'); check.textContent = '';
   }
   saveStateDebounced();
+  updateHome();
 }
 
 // =====================
@@ -5337,6 +5635,7 @@ function saveJournal() {
   saveState();
   document.getElementById('journal-text').value = '';
   renderJournalHistory();
+  updateHome();
   showToast('📝 জার্নাল সংরক্ষিত হয়েছে।');
 }
 
@@ -6238,6 +6537,57 @@ function updateProgress() {
   updateAchievements();
   buildBarCharts();
   drawLineChart('progress-line-chart', 'weekly');
+  updateScoreCards(total, success);
+}
+
+// =====================
+// COMPOSITE SCORES
+// =====================
+function updateScoreCards(totalCheckins, successCheckins) {
+  var successRatio = totalCheckins > 0 ? successCheckins / totalCheckins : 0;
+
+  // 1) Recovery Score — blend of streak progress, check-in success rate,
+  //    session volume, and today's mission completion.
+  var doneToday = Object.values(state.todayHabits || {}).filter(Boolean).length;
+  var journalDoneToday = !!(state.journals && state.journals.some(function(j){ return j.dateRaw === new Date().toDateString(); }));
+  if (journalDoneToday) doneToday++;
+  var missionComp = Math.min(1, doneToday / 6) * 15;
+  var streakComp = Math.min(1, state.streak / 90) * 40;
+  var successComp = successRatio * 30;
+  var sessionComp = Math.min(1, state.totalSessions / 30) * 15;
+  var recoveryScore = Math.round(streakComp + successComp + sessionComp + missionComp);
+  recoveryScore = Math.max(0, Math.min(100, recoveryScore));
+
+  // 2) Pelvic Strength — grows with total kegel sessions completed (caps at 50 sessions = 100%)
+  var pelvicStrength = Math.max(0, Math.min(100, Math.round((state.totalSessions / 50) * 100)));
+  var levelMap = { beginner: 'শিক্ষার্থী স্তর', intermediate: 'মধ্যবর্তী স্তর', advanced: 'উন্নত স্তর' };
+
+  // 3) Discipline Level — how consistently the user checks in relative to days since they started
+  var dates = Object.keys(state.checkinHistory || {});
+  var disciplineLevel = 0;
+  if (dates.length > 0) {
+    var times = dates.map(function(d){ return new Date(d).getTime(); }).filter(function(t){ return !isNaN(t); });
+    if (times.length) {
+      var daysSince = Math.max(1, Math.round((Date.now() - Math.min.apply(null, times)) / 86400000) + 1);
+      disciplineLevel = Math.max(0, Math.min(100, Math.round((dates.length / daysSince) * 100)));
+    }
+  }
+
+  // 4) Porn-Free Score — overall success ratio across all check-ins (survives streak resets,
+  //    reflects the whole track record rather than just the current run)
+  var pornFreeScore = Math.round(successRatio * 100);
+
+  var setScore = function(id, barId, val, suffix) {
+    var el = document.getElementById(id), bar = document.getElementById(barId);
+    if (el) el.textContent = val + (suffix || '');
+    if (bar) bar.style.width = Math.max(0, Math.min(100, val)) + '%';
+  };
+  setScore('score-recovery', 'score-recovery-bar', recoveryScore, '');
+  setScore('score-pelvic', 'score-pelvic-bar', pelvicStrength, '%');
+  setScore('score-discipline', 'score-discipline-bar', disciplineLevel, '%');
+  setScore('score-pornfree', 'score-pornfree-bar', pornFreeScore, '%');
+  var pelvicLabelEl = document.getElementById('score-pelvic-label');
+  if (pelvicLabelEl) pelvicLabelEl.textContent = levelMap[state.kegelLevel] || 'শিক্ষার্থী স্তর';
 }
 
 function updateAchievements() {
